@@ -14,12 +14,16 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, helperText, id, className = '', ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
+    const isRequired = props.required;
 
     return (
       <div className={`input-group ${className}`}>
         {label && (
           <label htmlFor={inputId} className="input-group__label">
             {label}
+            {isRequired && (
+              <abbr title="Obligatorio" className="input-required-mark" aria-hidden="true"> *</abbr>
+            )}
           </label>
         )}
         <input

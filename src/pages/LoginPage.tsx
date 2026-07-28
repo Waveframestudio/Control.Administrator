@@ -84,7 +84,7 @@ export function LoginPage() {
                 label="Correo electrónico"
                 type="email"
                 autoComplete="email"
-                placeholder="usuario@empresa.com"
+                placeholder="Ingresar correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={submitting}
@@ -96,7 +96,7 @@ export function LoginPage() {
                 label="Contraseña"
                 type="password"
                 autoComplete="current-password"
-                placeholder="••••••••"
+                placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={submitting}
