@@ -28,8 +28,7 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
   const hasActiveFilters =
     filters.search !== '' ||
     filters.category !== 'all' ||
-    filters.status !== 'all' ||
-    filters.criticality !== 'all';
+    filters.status !== 'all';
 
   return (
     <div className="filters-bar">
@@ -38,7 +37,7 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
         <div className="filters-bar__search">
           <Input
             id="filter-search"
-            placeholder="Buscar por nombre o IP..."
+            placeholder="Buscar por usuario, producto, fecha, estado..."
             value={filters.search}
             onChange={handleSearchChange}
             className="filter-input-search"
@@ -70,21 +69,6 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
             { value: 'Active', label: 'Activo' },
             { value: 'Maintenance', label: 'Mantenimiento' },
             { value: 'Offline', label: 'Fuera de línea' },
-          ]}
-          className="filter-select"
-        />
-
-        {/* Criticality */}
-        <Select
-          id="filter-criticality"
-          value={filters.criticality}
-          onChange={handleSelectChange('criticality')}
-          options={[
-            { value: 'all', label: 'Todas las Criticidades' },
-            { value: 'Low', label: 'Baja' },
-            { value: 'Medium', label: 'Media' },
-            { value: 'High', label: 'Alta' },
-            { value: 'Critical', label: 'Crítica' },
           ]}
           className="filter-select"
         />

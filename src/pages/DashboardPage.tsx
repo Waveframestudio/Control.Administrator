@@ -16,7 +16,7 @@ export function DashboardPage() {
   const [assets, setAssets] = useState<SystemAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [filters, setFilters] = useState<AssetFiltersState>({
     search: '',
     category: 'all',
@@ -150,10 +150,10 @@ export function DashboardPage() {
           prev.map((asset) =>
             asset.id === formData.id
               ? ({
-                  ...asset,
-                  ...formData,
-                  last_inspected: uiTimestamp,
-                } as SystemAsset)
+                ...asset,
+                ...formData,
+                last_inspected: uiTimestamp,
+              } as SystemAsset)
               : asset
           )
         );
@@ -216,10 +216,10 @@ export function DashboardPage() {
         <section className="dashboard__header" aria-labelledby="dashboard-title">
           <div className="dashboard__title-group">
             <h1 id="dashboard-title" className="dashboard__title">
-              Activos del Sistema
+              Clientes
             </h1>
             <p className="dashboard__subtitle">
-              Gestiona nodos de red, servidores, bases de datos y estaciones de trabajo.
+              Gestiona tus clientes y productos.
             </p>
           </div>
 
@@ -234,7 +234,7 @@ export function DashboardPage() {
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              Nuevo Activo
+              Nuevo Cliente
             </Button>
           )}
         </section>
@@ -261,7 +261,7 @@ export function DashboardPage() {
         {loading ? (
           <div className="dashboard-loader">
             <div className="spinner"></div>
-            <p>Cargando activos...</p>
+            <p>Cargando clientes...</p>
           </div>
         ) : (
           <AssetTable

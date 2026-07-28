@@ -76,10 +76,7 @@ export function AssetTable({ assets, onEdit, onDelete }: AssetTableProps) {
             <line x1="8" y1="12" x2="16" y2="12"></line>
           </svg>
         </div>
-        <h3 className="empty-state__title">No se encontraron activos</h3>
-        <p className="empty-state__message">
-          Intenta ajustar los términos de búsqueda o los filtros.
-        </p>
+        <h3 className="empty-state__title">No se encontraron clientes registrados</h3>
       </div>
     );
   }
