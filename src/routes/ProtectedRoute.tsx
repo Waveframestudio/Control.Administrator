@@ -35,9 +35,9 @@ export function ProtectedRoute({
   // Show a loading spinner while the session is being hydrated
   if (loading) {
     return (
-      <div className="route-loading" role="status" aria-label="Loading session...">
+      <div className="route-loading" role="status" aria-label="Cargando sesión...">
         <div className="route-loading__spinner" aria-hidden="true" />
-        <p className="route-loading__text">Loading...</p>
+        <p className="route-loading__text">Cargando...</p>
       </div>
     );
   }

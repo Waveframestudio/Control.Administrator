@@ -37,11 +37,11 @@ export function LoginPage() {
     setError(null);
 
     if (!email.trim()) {
-      setError('Email is required.');
+      setError('El correo electrónico es obligatorio.');
       return;
     }
     if (!password) {
-      setError('Password is required.');
+      setError('La contraseña es obligatoria.');
       return;
     }
 
@@ -51,10 +51,10 @@ export function LoginPage() {
 
     if (!result.success) {
       // Normalize Supabase error messages for end users
-      const msg = result.error ?? 'Login failed. Please try again.';
+      const msg = result.error ?? 'Error al iniciar sesión. Por favor, intenta de nuevo.';
       setError(
         msg.includes('Invalid login credentials')
-          ? 'Incorrect email or password.'
+          ? 'Correo electrónico o contraseña incorrectos.'
           : msg
       );
     }
@@ -65,9 +65,9 @@ export function LoginPage() {
     <AuthLayout>
       <Card elevation="elevated" className="login-card">
         <Card.Header>
-          <h1 className="login-card__title">Sign In</h1>
+          <h1 className="login-card__title">Iniciar Sesión</h1>
           <p className="login-card__subtitle">
-            Enter your credentials to access the system
+            Ingresa tus credenciales para acceder al sistema
           </p>
         </Card.Header>
 
@@ -76,15 +76,15 @@ export function LoginPage() {
             id="login-form"
             onSubmit={handleSubmit}
             noValidate
-            aria-label="Login form"
+            aria-label="Formulario de inicio de sesión"
           >
             <div className="login-card__fields">
               <Input
                 id="login-email"
-                label="Email address"
+                label="Correo electrónico"
                 type="email"
                 autoComplete="email"
-                placeholder="you@company.com"
+                placeholder="usuario@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={submitting}
@@ -93,7 +93,7 @@ export function LoginPage() {
 
               <Input
                 id="login-password"
-                label="Password"
+                label="Contraseña"
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
@@ -122,7 +122,7 @@ export function LoginPage() {
                 loading={submitting}
                 disabled={submitting}
               >
-                Sign In
+                Iniciar Sesión
               </Button>
             </div>
           </form>
@@ -130,7 +130,7 @@ export function LoginPage() {
 
         <Card.Footer>
           <p className="login-card__footer-note">
-            Contact your administrator to request access.
+            Contacta al administrador para solicitar acceso.
           </p>
         </Card.Footer>
       </Card>

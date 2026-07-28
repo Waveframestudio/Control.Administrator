@@ -55,9 +55,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             loading={signingOut}
             onClick={handleSignOut}
             id="btn-sign-out"
-            aria-label="Sign out"
+            aria-label="Cerrar sesión"
           >
-            Sign Out
+            Cerrar sesión
           </Button>
         </div>
       </header>

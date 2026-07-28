@@ -6,8 +6,8 @@ interface RoleBadgeProps {
 }
 
 const ROLE_CONFIG: Record<UserRole, { label: string; className: string }> = {
-  admin: { label: 'Admin', className: 'role-badge--admin' },
-  viewer: { label: 'Viewer', className: 'role-badge--viewer' },
+  admin: { label: 'Administrador', className: 'role-badge--admin' },
+  viewer: { label: 'Lector', className: 'role-badge--viewer' },
 };
 
 /**
