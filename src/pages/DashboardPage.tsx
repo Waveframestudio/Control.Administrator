@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AppLayout } from '../layouts/AppLayout';
 import { Button } from '../components/ui/Button';
 import { AssetStats } from '../components/dashboard/AssetStats';
@@ -6,62 +6,17 @@ import { AssetFilters } from '../components/dashboard/AssetFilters';
 import { AssetTable } from '../components/dashboard/AssetTable';
 import { AssetModal } from '../components/dashboard/AssetModal';
 import { usePermissions } from '../hooks/usePermissions';
+import { supabase } from '../lib/supabase';
 import type { SystemAsset, AssetFiltersState, AssetStatsData } from '../types/assets.types';
-
-// ─── Initial Mock Data ────────────────────────────────────────────────────────
-const INITIAL_ASSETS: SystemAsset[] = [
-  {
-    id: '1',
-    name: 'Servidor de Base de Datos Principal',
-    ip_address: '10.0.4.15',
-    category: 'Database',
-    status: 'Active',
-    criticality: 'Critical',
-    last_inspected: '2026-07-27 14:32',
-  },
-  {
-    id: '2',
-    name: 'Firewall de Puerta de Enlace Externa',
-    ip_address: '192.168.1.1',
-    category: 'Network',
-    status: 'Active',
-    criticality: 'Critical',
-    last_inspected: '2026-07-28 09:15',
-  },
-  {
-    id: '3',
-    name: 'SO de Sandbox de Desarrollo',
-    ip_address: '172.16.42.8',
-    category: 'Workstation',
-    status: 'Maintenance',
-    criticality: 'Low',
-    last_inspected: '2026-07-25 18:00',
-  },
-  {
-    id: '4',
-    name: 'Proxy Web Corporativo',
-    ip_address: '10.0.1.250',
-    category: 'Network',
-    status: 'Offline',
-    criticality: 'High',
-    last_inspected: '2026-07-28 10:44',
-  },
-  {
-    id: '5',
-    name: 'Gateway de API de Analíticas',
-    ip_address: '10.0.2.110',
-    category: 'Server',
-    status: 'Active',
-    criticality: 'High',
-    last_inspected: '2026-07-27 22:11',
-  },
-];
 
 export function DashboardPage() {
   const { isAdmin } = usePermissions();
 
   // Assets and Filters State
-  const [assets, setAssets] = useState<SystemAsset[]>(INITIAL_ASSETS);
+  const [assets, setAssets] = useState<SystemAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [filters, setFilters] = useState<AssetFiltersState>({
     search: '',
     category: 'all',
@@ -72,6 +27,50 @@ export function DashboardPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState<SystemAsset | null>(null);
+
+  // ── Fetch Assets from Supabase ─────────────────────────────────────────────
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { data, error: supabaseError } = await supabase
+          .from('assets')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (supabaseError) {
+          throw new Error(supabaseError.message);
+        }
+
+        // Format date timestamps to UI friendly strings "YYYY-MM-DD HH:mm"
+        const formattedAssets: SystemAsset[] = (data || []).map((item) => {
+          let dateStr = item.last_inspected;
+          if (dateStr) {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+              const pad = (n: number) => n.toString().padStart(2, '0');
+              dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            }
+          }
+          return {
+            ...item,
+            last_inspected: dateStr,
+          } as SystemAsset;
+        });
+
+        setAssets(formattedAssets);
+      } catch (err: any) {
+        console.error('[DashboardPage] Error fetching assets:', err);
+        setError(err.message || 'Error al cargar los activos desde la base de datos.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssets();
+  }, []);
 
   // ── Calculate Stats ────────────────────────────────────────────────────────
   const stats = useMemo<AssetStatsData>(() => {
@@ -121,41 +120,92 @@ export function DashboardPage() {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (formData: Omit<SystemAsset, 'id' | 'last_inspected'> & { id?: string }) => {
+  const handleFormSubmit = async (formData: Omit<SystemAsset, 'id' | 'last_inspected'> & { id?: string }) => {
     if (!isAdmin) return;
 
-    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+    // Use current time in UTC/ISO format for Postgres TIMESTAMP WITH TIME ZONE
+    const isoTimestamp = new Date().toISOString();
+    const uiTimestamp = isoTimestamp.replace('T', ' ').substring(0, 16);
 
-    if (formData.id) {
-      // Update
-      setAssets((prev) =>
-        prev.map((asset) =>
-          asset.id === formData.id
-            ? {
-                ...asset,
-                ...formData,
-                last_inspected: timestamp, // update timestamp on edit
-              } as SystemAsset
-            : asset
-        )
-      );
-    } else {
-      // Insert
-      const newAsset: SystemAsset = {
-        ...formData,
-        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9),
-        last_inspected: timestamp,
-      } as SystemAsset;
-      setAssets((prev) => [newAsset, ...prev]);
+    try {
+      setError(null);
+      if (formData.id) {
+        // Update in Supabase
+        const { error: updateError } = await supabase
+          .from('assets')
+          .update({
+            name: formData.name,
+            ip_address: formData.ip_address,
+            category: formData.category,
+            status: formData.status,
+            criticality: formData.criticality,
+            last_inspected: isoTimestamp,
+          })
+          .eq('id', formData.id);
+
+        if (updateError) throw new Error(updateError.message);
+
+        // Update local state
+        setAssets((prev) =>
+          prev.map((asset) =>
+            asset.id === formData.id
+              ? ({
+                  ...asset,
+                  ...formData,
+                  last_inspected: uiTimestamp,
+                } as SystemAsset)
+              : asset
+          )
+        );
+      } else {
+        // Insert in Supabase
+        const { data, error: insertError } = await supabase
+          .from('assets')
+          .insert({
+            name: formData.name,
+            ip_address: formData.ip_address,
+            category: formData.category,
+            status: formData.status,
+            criticality: formData.criticality,
+            last_inspected: isoTimestamp,
+          })
+          .select()
+          .single();
+
+        if (insertError) throw new Error(insertError.message);
+
+        const newAsset: SystemAsset = {
+          ...formData,
+          id: data.id,
+          last_inspected: uiTimestamp,
+        } as SystemAsset;
+
+        setAssets((prev) => [newAsset, ...prev]);
+      }
+      setIsModalOpen(false);
+    } catch (err: any) {
+      console.error('[DashboardPage] Error saving asset:', err);
+      alert(`Error al guardar el activo: ${err.message}`);
     }
-
-    setIsModalOpen(false);
   };
 
-  const handleDeleteAsset = (id: string) => {
+  const handleDeleteAsset = async (id: string) => {
     if (!isAdmin) return;
     if (window.confirm('¿Estás seguro de que deseas eliminar este activo?')) {
-      setAssets((prev) => prev.filter((asset) => asset.id !== id));
+      try {
+        setError(null);
+        const { error: deleteError } = await supabase
+          .from('assets')
+          .delete()
+          .eq('id', id);
+
+        if (deleteError) throw new Error(deleteError.message);
+
+        setAssets((prev) => prev.filter((asset) => asset.id !== id));
+      } catch (err: any) {
+        console.error('[DashboardPage] Error deleting asset:', err);
+        alert(`Error al eliminar el activo: ${err.message}`);
+      }
     }
   };
 
@@ -195,12 +245,31 @@ export function DashboardPage() {
         {/* ── Filter Controls ── */}
         <AssetFilters filters={filters} onChange={setFilters} />
 
-        {/* ── Records Table ── */}
-        <AssetTable
-          assets={filteredAssets}
-          onEdit={handleOpenEditModal}
-          onDelete={handleDeleteAsset}
-        />
+        {/* ── Error Alert ── */}
+        {error && (
+          <div className="dashboard-error-alert" role="alert">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* ── Records Table or Loader ── */}
+        {loading ? (
+          <div className="dashboard-loader">
+            <div className="spinner"></div>
+            <p>Cargando activos...</p>
+          </div>
+        ) : (
+          <AssetTable
+            assets={filteredAssets}
+            onEdit={handleOpenEditModal}
+            onDelete={handleDeleteAsset}
+          />
+        )}
 
         {/* ── Admin Edit/Create Modal ── */}
         {isAdmin && (
