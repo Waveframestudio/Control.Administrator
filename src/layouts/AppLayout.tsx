@@ -70,6 +70,21 @@ export function AppLayout({ children }: AppLayoutProps) {
       <main className="app-layout__content">
         {children}
       </main>
+
+      {/* ── Footer ── */}
+      <footer className="app-footer">
+        <p className="app-footer__text">
+          &copy; 2026 Control Administrator todos los derechos reservados. | Desarrollado por{' '}
+          <a
+            href="https://waveframe.com.ar/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="app-footer__link"
+          >
+            WaveFrame Studio
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
