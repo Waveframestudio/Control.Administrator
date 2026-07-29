@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
-import { Button } from '../components/ui/Button';
 import { RoleBadge } from '../components/RoleBadge';
 import type { UserRole } from '../types/auth.types';
 

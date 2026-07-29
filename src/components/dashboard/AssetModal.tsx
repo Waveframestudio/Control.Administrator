@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
+import { Textarea } from '../ui/Textarea';
 import { Button } from '../ui/Button';
-import type { SystemAsset, AssetCategory, AssetStatus, AssetCriticality } from '../../types/assets.types';
+import type { SystemAsset } from '../../types/assets.types';
 
 interface AssetModalProps {
   isOpen: boolean;
@@ -12,51 +13,75 @@ interface AssetModalProps {
   assetToEdit: SystemAsset | null;
 }
 
-const CATEGORY_OPTIONS = [
-  { value: 'Server', label: 'Servidor' },
-  { value: 'Workstation', label: 'Estación de Trabajo' },
-  { value: 'Database', label: 'Base de Datos' },
-  { value: 'Network', label: 'Red' },
-];
-
-const STATUS_OPTIONS = [
+const CLIENT_STATUS_OPTIONS = [
   { value: 'Active', label: 'Activo' },
-  { value: 'Maintenance', label: 'Mantenimiento' },
-  { value: 'Offline', label: 'Fuera de línea' },
+  { value: 'Pending', label: 'En proceso' },
+  { value: 'Inactive', label: 'Inactivo' },
 ];
 
-const CRITICALITY_OPTIONS = [
+const PRIORITY_OPTIONS = [
   { value: 'Low', label: 'Baja' },
-  { value: 'Medium', label: 'Media' },
+  { value: 'Medium', label: 'Normal' },
   { value: 'High', label: 'Alta' },
-  { value: 'Critical', label: 'Crítica' },
+  { value: 'Critical', label: 'Urgente' },
 ];
 
 export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
-  const [name, setName] = useState('');
-  const [ipAddress, setIpAddress] = useState('');
-  const [category, setCategory] = useState<AssetCategory>('Server');
-  const [status, setStatus] = useState<AssetStatus>('Active');
-  const [criticality, setCriticality] = useState<AssetCriticality>('Medium');
+  // Parte 1: Producto solicitado
+  const [descripcion, setDescripcion] = useState('');
+  const [largo, setLargo] = useState('');
+  const [ancho, setAncho] = useState('');
+  const [cantidadUnidades, setCantidadUnidades] = useState('');
+  const [cantidadKilos, setCantidadKilos] = useState('');
+  const [cantidadMetros, setCantidadMetros] = useState('');
+  const [datosExtras, setDatosExtras] = useState('');
+
+  // Parte 2: Datos del Cliente
+  const [clientName, setClientName] = useState('');
+  const [rutCuit, setRutCuit] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [clientStatus, setClientStatus] = useState('Active');
+
+  // Parte 3: Condiciones y Entrega
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [shippingMethod, setShippingMethod] = useState('');
+  const [paymentTerms, setPaymentTerms] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [priority, setPriority] = useState('Medium');
+  const [notes, setNotes] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Populate form if editing
   useEffect(() => {
     if (assetToEdit) {
-      setName(assetToEdit.name);
-      setIpAddress(assetToEdit.ip_address);
-      setCategory(assetToEdit.category);
-      setStatus(assetToEdit.status);
-      setCriticality(assetToEdit.criticality);
+      setClientName(assetToEdit.name || '');
+      setDescripcion(assetToEdit.ip_address || '');
       setErrors({});
     } else {
-      // Reset to defaults for a new asset
-      setName('');
-      setIpAddress('');
-      setCategory('Server');
-      setStatus('Active');
-      setCriticality('Medium');
+      // Reset form
+      setDescripcion('');
+      setLargo('');
+      setAncho('');
+      setCantidadUnidades('');
+      setCantidadKilos('');
+      setCantidadMetros('');
+      setDatosExtras('');
+
+      setClientName('');
+      setRutCuit('');
+      setPhone('');
+      setEmail('');
+      setAddress('');
+      setClientStatus('Active');
+
+      setDeliveryDate('');
+      setShippingMethod('');
+      setPaymentTerms('');
+      setDeliveryAddress('');
+      setPriority('Medium');
+      setNotes('');
       setErrors({});
     }
   }, [assetToEdit, isOpen]);
@@ -64,15 +89,12 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!name.trim()) {
-      newErrors.name = 'El nombre del activo es obligatorio.';
+    if (!descripcion.trim()) {
+      newErrors.descripcion = 'La descripción del producto es obligatoria.';
     }
 
-    const ipRegex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    if (!ipAddress.trim()) {
-      newErrors.ipAddress = 'La dirección IP es obligatoria.';
-    } else if (!ipRegex.test(ipAddress.trim())) {
-      newErrors.ipAddress = 'Ingresa una dirección IPv4 válida (ej. 192.168.1.5).';
+    if (!clientName.trim()) {
+      newErrors.clientName = 'El nombre del cliente es obligatorio.';
     }
 
     setErrors(newErrors);
@@ -85,11 +107,11 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
 
     onSubmit({
       id: assetToEdit?.id,
-      name: name.trim(),
-      ip_address: ipAddress.trim(),
-      category,
-      status,
-      criticality,
+      name: clientName.trim(),
+      ip_address: descripcion.trim(),
+      category: 'Workstation',
+      status: clientStatus as any,
+      criticality: priority as any,
     });
   };
 
@@ -97,65 +119,223 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={assetToEdit ? 'Editar Activo de Sistema' : 'Nuevo Activo de Sistema'}
+      title={assetToEdit ? 'Editar Cliente' : 'Nuevo Cliente'}
+      size="xl"
     >
-      <form onSubmit={handleSubmit} noValidate className="asset-form">
-        <div className="asset-form__fields">
-          <Input
-            id="asset-name"
-            label="Nombre del Activo"
-            type="text"
-            placeholder="ej. Servidor de Base de Datos 01"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            error={errors.name}
-            required
-          />
+      <form onSubmit={handleSubmit} noValidate className="client-form">
+        <div className="client-form__grid">
+          {/* ── Parte 1: Producto solicitado (Izquierda) ── */}
+          <section className="client-form__column">
+            <header className="client-form__section-header">
+              <div className="client-form__badge">1</div>
+              <h3 className="client-form__subtitle">Producto solicitado</h3>
+            </header>
 
-          <Input
-            id="asset-ip"
-            label="Dirección IP"
-            type="text"
-            placeholder="ej. 10.0.0.12"
-            value={ipAddress}
-            onChange={(e) => setIpAddress(e.target.value)}
-            error={errors.ipAddress}
-            required
-          />
+            <div className="client-form__fields">
+              <Textarea
+                id="product-description"
+                label="Descripción"
+                rows={1}
+                placeholder="Escribe la descripción detallada..."
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                error={errors.descripcion}
+                required
+              />
 
-          <div className="asset-form__row">
-            <Select
-              id="asset-category"
-              label="Categoría"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as AssetCategory)}
-              options={CATEGORY_OPTIONS}
-            />
+              <div className="client-form__row">
+                <Input
+                  id="product-largo"
+                  label="Largo"
+                  type="text"
+                  placeholder="ej. 120 cm"
+                  value={largo}
+                  onChange={(e) => setLargo(e.target.value)}
+                />
+                <Input
+                  id="product-ancho"
+                  label="Ancho"
+                  type="text"
+                  placeholder="ej. 80 cm"
+                  value={ancho}
+                  onChange={(e) => setAncho(e.target.value)}
+                />
+              </div>
 
-            <Select
-              id="asset-status"
-              label="Estado"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as AssetStatus)}
-              options={STATUS_OPTIONS}
-            />
-          </div>
+              <div className="client-form__row-3">
+                <Input
+                  id="product-unidades"
+                  label="Cant. Unid."
+                  type="number"
+                  placeholder="0"
+                  value={cantidadUnidades}
+                  onChange={(e) => setCantidadUnidades(e.target.value)}
+                />
+                <Input
+                  id="product-kilos"
+                  label="Cant. Kg."
+                  type="number"
+                  placeholder="0.00"
+                  value={cantidadKilos}
+                  onChange={(e) => setCantidadKilos(e.target.value)}
+                />
+                <Input
+                  id="product-metros"
+                  label="Cant. Mts."
+                  type="number"
+                  placeholder="0.00"
+                  value={cantidadMetros}
+                  onChange={(e) => setCantidadMetros(e.target.value)}
+                />
+              </div>
 
-          <Select
-            id="asset-criticality"
-            label="Criticidad"
-            value={criticality}
-            onChange={(e) => setCriticality(e.target.value as AssetCriticality)}
-            options={CRITICALITY_OPTIONS}
-          />
+              <Textarea
+                id="product-extras"
+                label="Datos extras"
+                rows={1}
+                placeholder="Especificaciones adicionales..."
+                value={datosExtras}
+                onChange={(e) => setDatosExtras(e.target.value)}
+              />
+            </div>
+          </section>
+
+          {/* ── Parte 2: Datos del Cliente (Centro) ── */}
+          <section className="client-form__column">
+            <header className="client-form__section-header">
+              <div className="client-form__badge">2</div>
+              <h3 className="client-form__subtitle">Datos del Cliente</h3>
+            </header>
+
+            <div className="client-form__fields">
+              <Input
+                id="client-name"
+                label="Nombre / Razón Social"
+                type="text"
+                placeholder="ej. Industrias Alfa S.A."
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                error={errors.clientName}
+                required
+              />
+
+              <Input
+                id="client-rut"
+                label="RUT / CUIT / ID"
+                type="text"
+                placeholder="ej. 21-12345678-9"
+                value={rutCuit}
+                onChange={(e) => setRutCuit(e.target.value)}
+              />
+
+              <div className="client-form__row">
+                <Input
+                  id="client-phone"
+                  label="Teléfono"
+                  type="tel"
+                  placeholder="+54 11 1234-5678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <Input
+                  id="client-email"
+                  label="Email"
+                  type="email"
+                  placeholder="contacto@cliente.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <Input
+                id="client-address"
+                label="Dirección Principal"
+                type="text"
+                placeholder="ej. Av. Corrientes 1234, CABA"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+
+              <Select
+                id="client-status"
+                label="Estado del Cliente"
+                value={clientStatus}
+                onChange={(e) => setClientStatus(e.target.value)}
+                options={CLIENT_STATUS_OPTIONS}
+              />
+            </div>
+          </section>
+
+          {/* ── Parte 3: Condiciones y Entrega (Derecha) ── */}
+          <section className="client-form__column">
+            <header className="client-form__section-header">
+              <div className="client-form__badge">3</div>
+              <h3 className="client-form__subtitle">Condiciones y Entrega</h3>
+            </header>
+
+            <div className="client-form__fields">
+              <div className="client-form__row">
+                <Input
+                  id="delivery-date"
+                  label="Fecha de Entrega"
+                  type="date"
+                  value={deliveryDate}
+                  onChange={(e) => setDeliveryDate(e.target.value)}
+                />
+                <Select
+                  id="order-priority"
+                  label="Prioridad"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  options={PRIORITY_OPTIONS}
+                />
+              </div>
+
+              <Input
+                id="shipping-method"
+                label="Método de Envío"
+                type="text"
+                placeholder="ej. Flete Propio / Retira en Depósito"
+                value={shippingMethod}
+                onChange={(e) => setShippingMethod(e.target.value)}
+              />
+
+              <Input
+                id="payment-terms"
+                label="Condición de Pago"
+                type="text"
+                placeholder="ej. 30 días fecha factura"
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+              />
+
+              <Input
+                id="delivery-address"
+                label="Lugar de Entrega"
+                type="text"
+                placeholder="Misma que dirección principal o depósito"
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+              />
+
+              <Textarea
+                id="order-notes"
+                label="Observaciones Internas"
+                rows={1}
+                placeholder="Comentarios adicionales para logística o administración..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </div>
+          </section>
         </div>
 
-        <footer className="asset-form__actions">
+        <footer className="client-form__actions">
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancelar
           </Button>
           <Button type="submit" variant="primary">
-            {assetToEdit ? 'Guardar Cambios' : 'Crear Activo'}
+            {assetToEdit ? 'Guardar Cambios' : 'Guardar Cliente'}
           </Button>
         </footer>
       </form>
