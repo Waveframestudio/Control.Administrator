@@ -101,10 +101,66 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const toDMY = (dateStr?: string): string => {
+    if (!dateStr) return '';
+    const trimmed = dateStr.trim();
+    if (!trimmed) return '';
+    if (trimmed.includes('/')) return trimmed;
+    const datePart = trimmed.split('T')[0].split(' ')[0];
+    const parts = datePart.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      const [year, month, day] = parts;
+      return `${day}/${month}/${year}`;
+    }
+    return trimmed;
+  };
+
   useEffect(() => {
     if (assetToEdit) {
       setClientName(assetToEdit.name || '');
-      setDescripcion(assetToEdit.ip_address || '');
+      setFechaComienzo(toDMY(assetToEdit.fecha_comienzo));
+      setFechaFin(toDMY(assetToEdit.fecha_fin));
+      setDeliveryDate(toDMY(assetToEdit.fecha_entrega));
+
+      setDescripcion(assetToEdit.descripcion || assetToEdit.ip_address || '');
+      setLargo(assetToEdit.largo || '');
+      setAncho(assetToEdit.ancho || '');
+      setCantidadUnidades(assetToEdit.cantidad_unidades?.toString() || '');
+      setCantidadKilos(assetToEdit.cantidad_kilos?.toString() || '');
+      setCantidadMetros(assetToEdit.cantidad_metros?.toString() || '');
+      setDatosExtras(assetToEdit.dato_extra_producto || '');
+
+      setMaterialCliente(assetToEdit.material_cliente || 'no');
+      setTubo(assetToEdit.tubo_tipo || '');
+      setTratado(assetToEdit.tratado || 'no');
+      setCaras(assetToEdit.caras_extrusion || '1 cara');
+      setFuelle(assetToEdit.fuelle || 'no');
+      setMicroperforada(assetToEdit.microperforada || 'no');
+      setMaterialExtrudar(assetToEdit.material_a_extrudar || '');
+      setColorTela(assetToEdit.color_tela || '');
+      setKgExtrudados(assetToEdit.kilos_extrudados?.toString() || '');
+      setMtsExtrudados(assetToEdit.metros_extrudados?.toString() || '');
+      setCantUnidExtrusion(assetToEdit.cantidad_bobinas?.toString() || '');
+      setDatoExtraExtrusion(assetToEdit.dato_extra_extrusion || '');
+      setExtrusor(assetToEdit.extrusor || '');
+
+      setCorte(assetToEdit.corte || 'Lateral');
+      setGolpePorMinuto(assetToEdit.golpes_por_minuto?.toString() || '');
+      setPista(assetToEdit.pista || 'Simple');
+      setDatoExtraConfeccion(assetToEdit.dato_extra_confeccion || '');
+      setCantResultante(assetToEdit.cantidad_resultante?.toString() || '');
+      setBultos(assetToEdit.bultos?.toString() || '');
+      setConfeccionista(assetToEdit.confeccionista || '');
+
+      setImpresionCaras(assetToEdit.impresion_caras || '1 cara');
+      setColoresImpresion(assetToEdit.colores_impresion || '1C');
+      setMtsPorHora(assetToEdit.metros_por_hora?.toString() || '');
+      setTPuestaAPunto(assetToEdit.t_puesta_a_punto || '');
+      setTImpresion(assetToEdit.t_impresion || '');
+      setCilindro(assetToEdit.cilindro || '');
+      setBobinasImpresas(assetToEdit.bobinas_impresas?.toString() || '');
+      setColores(assetToEdit.colores_detalle || '');
+      setImpresor(assetToEdit.impresor || '');
       setErrors({});
     } else {
       // Reset form
@@ -182,6 +238,50 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       category: 'Workstation',
       status: 'Active',
       criticality: 'Medium',
+
+      fecha_comienzo: fechaComienzo,
+      fecha_fin: fechaFin,
+      fecha_entrega: deliveryDate,
+
+      descripcion: descripcion.trim(),
+      largo,
+      ancho,
+      cantidad_unidades: cantidadUnidades,
+      cantidad_kilos: cantidadKilos,
+      cantidad_metros: cantidadMetros,
+      dato_extra_producto: datosExtras,
+
+      material_cliente: materialCliente as any,
+      tubo_tipo: tubo,
+      tratado: tratado as any,
+      caras_extrusion: caras,
+      fuelle: fuelle as any,
+      microperforada: microperforada as any,
+      material_a_extrudar: materialExtrudar,
+      color_tela: colorTela,
+      kilos_extrudados: kgExtrudados,
+      metros_extrudados: mtsExtrudados,
+      cantidad_bobinas: cantUnidExtrusion,
+      dato_extra_extrusion: datoExtraExtrusion,
+      extrusor,
+
+      corte: corte as any,
+      golpes_por_minuto: golpePorMinuto,
+      pista: pista as any,
+      dato_extra_confeccion: datoExtraConfeccion,
+      cantidad_resultante: cantResultante,
+      bultos,
+      confeccionista,
+
+      impresion_caras: impresionCaras as any,
+      colores_impresion: coloresImpresion as any,
+      metros_por_hora: mtsPorHora,
+      t_puesta_a_punto: tPuestaAPunto,
+      t_impresion: tImpresion,
+      cilindro,
+      bobinas_impresas: bobinasImpresas,
+      colores_detalle: colores,
+      impresor,
     });
   };
 
@@ -208,21 +308,24 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
           <Input
             id="top-fecha-comienzo"
             label="Fecha comienzo"
-            type="date"
+            type="text"
+            placeholder="dd/mm/aaaa"
             value={fechaComienzo}
             onChange={(e) => setFechaComienzo(e.target.value)}
           />
           <Input
             id="top-fecha-fin"
             label="Fecha fin"
-            type="date"
+            type="text"
+            placeholder="dd/mm/aaaa"
             value={fechaFin}
             onChange={(e) => setFechaFin(e.target.value)}
           />
           <Input
             id="top-fecha-entrega"
             label="Fecha entrega"
-            type="date"
+            type="text"
+            placeholder="dd/mm/aaaa"
             value={deliveryDate}
             onChange={(e) => setDeliveryDate(e.target.value)}
           />

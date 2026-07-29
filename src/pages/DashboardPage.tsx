@@ -5,6 +5,7 @@ import { AssetStats } from '../components/dashboard/AssetStats';
 import { AssetFilters } from '../components/dashboard/AssetFilters';
 import { AssetTable } from '../components/dashboard/AssetTable';
 import { AssetModal } from '../components/dashboard/AssetModal';
+import { ClientPrintSheet } from '../components/dashboard/ClientPrintSheet';
 import { usePermissions } from '../hooks/usePermissions';
 import { supabase } from '../lib/supabase';
 import type { SystemAsset, AssetFiltersState, AssetStatsData } from '../types/assets.types';
@@ -27,6 +28,9 @@ export function DashboardPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState<SystemAsset | null>(null);
+
+  // Print State
+  const [selectedClientForPrint, setSelectedClientForPrint] = useState<SystemAsset | null>(null);
 
   // ── Fetch Assets from Supabase ─────────────────────────────────────────────
   useEffect(() => {
@@ -85,21 +89,17 @@ export function DashboardPage() {
   // ── Filter Assets ──────────────────────────────────────────────────────────
   const filteredAssets = useMemo(() => {
     return assets.filter((asset) => {
-      // Search search filter (matches name or IP)
       const searchMatch =
         filters.search === '' ||
         asset.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        asset.ip_address.includes(filters.search);
+        asset.ip_address.toLowerCase().includes(filters.search.toLowerCase());
 
-      // Category filter
       const categoryMatch =
         filters.category === 'all' || asset.category === filters.category;
 
-      // Status filter
       const statusMatch =
         filters.status === 'all' || asset.status === filters.status;
 
-      // Criticality filter
       const criticalityMatch =
         filters.criticality === 'all' || asset.criticality === filters.criticality;
 
@@ -107,7 +107,7 @@ export function DashboardPage() {
     });
   }, [assets, filters]);
 
-  // ── CRUD Handlers (Simulating Supabase Writes) ──────────────────────────────
+  // ── CRUD Handlers ──────────────────────────────────────────────────────────
   const handleOpenCreateModal = () => {
     if (!isAdmin) return;
     setAssetToEdit(null);
@@ -123,14 +123,12 @@ export function DashboardPage() {
   const handleFormSubmit = async (formData: Omit<SystemAsset, 'id' | 'last_inspected'> & { id?: string }) => {
     if (!isAdmin) return;
 
-    // Use current time in UTC/ISO format for Postgres TIMESTAMP WITH TIME ZONE
     const isoTimestamp = new Date().toISOString();
     const uiTimestamp = isoTimestamp.replace('T', ' ').substring(0, 16);
 
     try {
       setError(null);
       if (formData.id) {
-        // Update in Supabase
         const { error: updateError } = await supabase
           .from('assets')
           .update({
@@ -145,7 +143,6 @@ export function DashboardPage() {
 
         if (updateError) throw new Error(updateError.message);
 
-        // Update local state
         setAssets((prev) =>
           prev.map((asset) =>
             asset.id === formData.id
@@ -158,7 +155,6 @@ export function DashboardPage() {
           )
         );
       } else {
-        // Insert in Supabase
         const { data, error: insertError } = await supabase
           .from('assets')
           .insert({
@@ -209,13 +205,29 @@ export function DashboardPage() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  // ── Print Handlers ────────────────────────────────────────────────────────
+  const handlePrintAll = () => {
+    setSelectedClientForPrint(null);
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
-  const handleExportPDF = () => {
-    window.print();
+  const handlePrintIndividual = (client: SystemAsset) => {
+    setSelectedClientForPrint(client);
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
+
+  // ── Batch Print Pairs (2 clients per page) ────────────────────────────────
+  const clientPairs = useMemo(() => {
+    const pairs: SystemAsset[][] = [];
+    for (let i = 0; i < filteredAssets.length; i += 2) {
+      pairs.push(filteredAssets.slice(i, i + 2));
+    }
+    return pairs;
+  }, [filteredAssets]);
 
   return (
     <AppLayout>
@@ -236,7 +248,7 @@ export function DashboardPage() {
               id="btn-export-pdf"
               variant="secondary"
               size="md"
-              onClick={handleExportPDF}
+              onClick={handlePrintAll}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -251,14 +263,14 @@ export function DashboardPage() {
               id="btn-print"
               variant="secondary"
               size="md"
-              onClick={handlePrint}
+              onClick={handlePrintAll}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
                 <polyline points="6 9 6 2 18 2 18 9"></polyline>
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                 <rect x="6" y="14" width="12" height="8"></rect>
               </svg>
-              Imprimir
+              Imprimir Fichas
             </Button>
 
             {isAdmin && (
@@ -307,6 +319,7 @@ export function DashboardPage() {
             assets={filteredAssets}
             onEdit={handleOpenEditModal}
             onDelete={handleDeleteAsset}
+            onPrintIndividual={handlePrintIndividual}
           />
         )}
 
@@ -319,7 +332,40 @@ export function DashboardPage() {
             assetToEdit={assetToEdit}
           />
         )}
+
+        {/* ── Printable Technical Sheets Container (Hidden on Screen, Visible on Print) ── */}
+        <div className="printable-sheets-area">
+          {selectedClientForPrint ? (
+            <div className="print-page-pair">
+              <div className="print-sheet-item">
+                <ClientPrintSheet asset={selectedClientForPrint} />
+              </div>
+            </div>
+          ) : (
+            clientPairs.map((pair, pairIdx) => (
+              <div key={`print-pair-${pairIdx}`} className="print-page-pair">
+                {pair.map((asset, idx) => (
+                  <div key={`print-${asset.id}`} className="print-sheet-wrapper">
+                    <div className="print-sheet-item">
+                      <ClientPrintSheet asset={asset} />
+                    </div>
+                    {idx === 0 && pair.length > 1 && (
+                      <div className="print-cut-line">
+                        <span className="print-cut-line__scissors">✂</span>
+                        <span className="print-cut-line__dashed"></span>
+                        <span className="print-cut-line__label">LÍNEA DE CORTE</span>
+                        <span className="print-cut-line__dashed"></span>
+                        <span className="print-cut-line__scissors">✂</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </AppLayout>
   );
 }
+

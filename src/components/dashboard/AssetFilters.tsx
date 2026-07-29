@@ -37,7 +37,7 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
         <div className="filters-bar__search">
           <Input
             id="filter-search"
-            placeholder="Buscar por usuario, producto, fecha, estado..."
+            placeholder="Buscar por cliente, producto, fecha, estado..."
             value={filters.search}
             onChange={handleSearchChange}
             className="filter-input-search"
@@ -50,11 +50,11 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
           value={filters.category}
           onChange={handleSelectChange('category')}
           options={[
-            { value: 'all', label: 'Todas las Categorías' },
-            { value: 'Server', label: 'Servidores' },
-            { value: 'Workstation', label: 'Estaciones de Trabajo' },
-            { value: 'Database', label: 'Bases de Datos' },
-            { value: 'Network', label: 'Redes' },
+            { value: 'all', label: 'Todos los Tipos' },
+            { value: 'Server', label: 'Polietileno' },
+            { value: 'Workstation', label: 'Bolsa / Lámina' },
+            { value: 'Database', label: 'Bobina / Tubo' },
+            { value: 'Network', label: 'Impresos' },
           ]}
           className="filter-select"
         />
