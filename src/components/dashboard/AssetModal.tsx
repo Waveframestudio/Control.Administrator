@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
-import { Select } from '../ui/Select';
 import { Textarea } from '../ui/Textarea';
 import { TogglePill } from '../ui/TogglePill';
 import { Button } from '../ui/Button';
@@ -24,11 +23,15 @@ const CARAS_OPTIONS = [
   { value: '2 caras', label: '2 caras' },
 ];
 
-const PRIORITY_OPTIONS = [
-  { value: 'Low', label: 'Baja' },
-  { value: 'Medium', label: 'Normal' },
-  { value: 'High', label: 'Alta' },
-  { value: 'Critical', label: 'Urgente' },
+const CORTE_OPTIONS = [
+  { value: 'Lateral', label: 'Lateral' },
+  { value: 'Fondo', label: 'Fondo' },
+];
+
+const PISTA_OPTIONS = [
+  { value: 'Simple', label: 'Simple' },
+  { value: 'Doble', label: 'Doble' },
+  { value: 'Triple', label: 'Triple' },
 ];
 
 export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
@@ -62,12 +65,14 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   const [datoExtraExtrusion, setDatoExtraExtrusion] = useState('');
   const [extrusor, setExtrusor] = useState('');
 
-  // Parte 3: Condiciones y Entrega
-  const [shippingMethod, setShippingMethod] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [priority, setPriority] = useState('Medium');
-  const [notes, setNotes] = useState('');
+  // Parte 3: Datos de confección
+  const [corte, setCorte] = useState('Lateral');
+  const [golpePorMinuto, setGolpePorMinuto] = useState('');
+  const [pista, setPista] = useState('Simple');
+  const [datoExtraConfeccion, setDatoExtraConfeccion] = useState('');
+  const [cantResultante, setCantResultante] = useState('');
+  const [bultos, setBultos] = useState('');
+  const [confeccionista, setConfeccionista] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -105,11 +110,13 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       setDatoExtraExtrusion('');
       setExtrusor('');
 
-      setShippingMethod('');
-      setPaymentTerms('');
-      setDeliveryAddress('');
-      setPriority('Medium');
-      setNotes('');
+      setCorte('Lateral');
+      setGolpePorMinuto('');
+      setPista('Simple');
+      setDatoExtraConfeccion('');
+      setCantResultante('');
+      setBultos('');
+      setConfeccionista('');
       setErrors({});
     }
   }, [assetToEdit, isOpen]);
@@ -139,7 +146,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       ip_address: descripcion.trim(),
       category: 'Workstation',
       status: 'Active',
-      criticality: priority as any,
+      criticality: 'Medium',
     });
   };
 
@@ -356,7 +363,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                 />
                 <Input
                   id="extrusion-cant-unid"
-                  label="Cant unid"
+                  label="Cant bobinas"
                   type="number"
                   placeholder="0"
                   value={cantUnidExtrusion}
@@ -384,56 +391,73 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             </div>
           </section>
 
-          {/* ── Parte 3: Condiciones y Entrega (Derecha) ── */}
+          {/* ── Parte 3: Datos de confección (Derecha) ── */}
           <section className="client-form__column">
             <header className="client-form__section-header">
               <div className="client-form__badge">3</div>
-              <h3 className="client-form__subtitle">Condiciones y Entrega</h3>
+              <h3 className="client-form__subtitle">Datos de confección</h3>
             </header>
 
             <div className="client-form__fields">
-              <Select
-                id="order-priority"
-                label="Prioridad"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                options={PRIORITY_OPTIONS}
+              <div className="client-form__row">
+                <TogglePill
+                  label="Corte"
+                  options={CORTE_OPTIONS}
+                  value={corte}
+                  onChange={setCorte}
+                />
+                <Input
+                  id="confeccion-golpe-min"
+                  label="Golpe por minuto"
+                  type="number"
+                  placeholder="0"
+                  value={golpePorMinuto}
+                  onChange={(e) => setGolpePorMinuto(e.target.value)}
+                />
+              </div>
+
+              <TogglePill
+                label="Pista"
+                options={PISTA_OPTIONS}
+                value={pista}
+                onChange={setPista}
               />
 
-              <Input
-                id="shipping-method"
-                label="Método de Envío"
-                type="text"
-                placeholder="ej. Flete Propio / Retira en Depósito"
-                value={shippingMethod}
-                onChange={(e) => setShippingMethod(e.target.value)}
-              />
+              <div className="client-form__row">
+                <Input
+                  id="confeccion-cant-resultante"
+                  label="Cant resultante"
+                  type="number"
+                  placeholder="0"
+                  value={cantResultante}
+                  onChange={(e) => setCantResultante(e.target.value)}
+                />
+                <Input
+                  id="confeccion-bultos"
+                  label="Bultos"
+                  type="number"
+                  placeholder="0"
+                  value={bultos}
+                  onChange={(e) => setBultos(e.target.value)}
+                />
+              </div>
 
               <Input
-                id="payment-terms"
-                label="Condición de Pago"
+                id="confeccion-confeccionista"
+                label="Confeccionista"
                 type="text"
-                placeholder="ej. 30 días fecha factura"
-                value={paymentTerms}
-                onChange={(e) => setPaymentTerms(e.target.value)}
-              />
-
-              <Input
-                id="delivery-address"
-                label="Lugar de Entrega"
-                type="text"
-                placeholder="Misma que dirección principal o depósito"
-                value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
+                placeholder="ej. Nombre del operario"
+                value={confeccionista}
+                onChange={(e) => setConfeccionista(e.target.value)}
               />
 
               <Textarea
-                id="order-notes"
-                label="Observaciones Internas"
+                id="confeccion-dato-extra"
+                label="Dato extra"
                 rows={1}
-                placeholder="Comentarios adicionales para logística o administración..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Detalles adicionales de confección..."
+                value={datoExtraConfeccion}
+                onChange={(e) => setDatoExtraConfeccion(e.target.value)}
               />
             </div>
           </section>
