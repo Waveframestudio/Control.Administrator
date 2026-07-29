@@ -1083,8 +1083,8 @@ textarea.input-group__field--textarea {
 .modal-content--md { max-width: 520px; }
 .modal-content--lg { max-width: 768px; }
 .modal-content--xl {
-  max-width: 1200px;
-  width: 95vw;
+  max-width: 1560px;
+  width: 96vw;
   max-height: calc(100vh - 48px);
 }
 
@@ -1201,8 +1201,14 @@ textarea.input-group__field--textarea {
 
 .client-form__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-4);
+}
+
+@media (max-width: 1400px) {
+  .client-form__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 1024px) {

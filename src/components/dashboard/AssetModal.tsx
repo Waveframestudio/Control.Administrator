@@ -34,6 +34,20 @@ const PISTA_OPTIONS = [
   { value: 'Triple', label: 'Triple' },
 ];
 
+const IMPRESION_CARAS_OPTIONS = [
+  { value: '1 cara', label: '1 cara' },
+  { value: '2 caras', label: '2 caras' },
+];
+
+const COLORES_OPTIONS = [
+  { value: '1C', label: '1C' },
+  { value: '2C', label: '2C' },
+  { value: '3C', label: '3C' },
+  { value: '4C', label: '4C' },
+  { value: '5C', label: '5C' },
+  { value: '6C', label: '6C' },
+];
+
 export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
   // Campos del encabezado horizontal
   const [clientName, setClientName] = useState('');
@@ -73,6 +87,17 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   const [cantResultante, setCantResultante] = useState('');
   const [bultos, setBultos] = useState('');
   const [confeccionista, setConfeccionista] = useState('');
+
+  // Parte 4: Datos de impresión
+  const [impresionCaras, setImpresionCaras] = useState('1 cara');
+  const [coloresImpresion, setColoresImpresion] = useState('1C');
+  const [mtsPorHora, setMtsPorHora] = useState('');
+  const [tPuestaAPunto, setTPuestaAPunto] = useState('');
+  const [tImpresion, setTImpresion] = useState('');
+  const [cilindro, setCilindro] = useState('');
+  const [bobinasImpresas, setBobinasImpresas] = useState('');
+  const [colores, setColores] = useState('');
+  const [impresor, setImpresor] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -117,6 +142,16 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       setCantResultante('');
       setBultos('');
       setConfeccionista('');
+
+      setImpresionCaras('1 cara');
+      setColoresImpresion('1C');
+      setMtsPorHora('');
+      setTPuestaAPunto('');
+      setTImpresion('');
+      setCilindro('');
+      setBobinasImpresas('');
+      setColores('');
+      setImpresor('');
       setErrors({});
     }
   }, [assetToEdit, isOpen]);
@@ -461,14 +496,104 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
               />
             </div>
           </section>
+
+          {/* ── Parte 4: Datos de impresión (Extremo derecho) ── */}
+          <section className="client-form__column">
+            <header className="client-form__section-header">
+              <div className="client-form__badge">4</div>
+              <h3 className="client-form__subtitle">Datos de impresión</h3>
+            </header>
+
+            <div className="client-form__fields">
+              <div className="client-form__row">
+                <TogglePill
+                  label="Impresión"
+                  options={IMPRESION_CARAS_OPTIONS}
+                  value={impresionCaras}
+                  onChange={setImpresionCaras}
+                />
+                <Input
+                  id="impresion-mts-hora"
+                  label="Mts por hora"
+                  type="number"
+                  placeholder="0"
+                  value={mtsPorHora}
+                  onChange={(e) => setMtsPorHora(e.target.value)}
+                />
+              </div>
+
+              <TogglePill
+                label="1C – 2C – 3C – 4C – 5C – 6C"
+                options={COLORES_OPTIONS}
+                value={coloresImpresion}
+                onChange={setColoresImpresion}
+              />
+
+              <div className="client-form__row">
+                <Input
+                  id="impresion-t-puesta-punto"
+                  label="T puesta a punto"
+                  type="text"
+                  placeholder="ej. 00:30"
+                  value={tPuestaAPunto}
+                  onChange={(e) => setTPuestaAPunto(e.target.value)}
+                />
+                <Input
+                  id="impresion-t-impresion"
+                  label="T de impresión"
+                  type="text"
+                  placeholder="ej. 02:15"
+                  value={tImpresion}
+                  onChange={(e) => setTImpresion(e.target.value)}
+                />
+              </div>
+
+              <div className="client-form__row">
+                <Input
+                  id="impresion-cilindro"
+                  label="Cilindro"
+                  type="text"
+                  placeholder="ej. C-12"
+                  value={cilindro}
+                  onChange={(e) => setCilindro(e.target.value)}
+                />
+                <Input
+                  id="impresion-bobinas"
+                  label="Bobinas impresas"
+                  type="number"
+                  placeholder="0"
+                  value={bobinasImpresas}
+                  onChange={(e) => setBobinasImpresas(e.target.value)}
+                />
+              </div>
+
+              <Input
+                id="impresion-colores"
+                label="Colores"
+                type="text"
+                placeholder="ej. Rojo, azul, blanco"
+                value={colores}
+                onChange={(e) => setColores(e.target.value)}
+              />
+
+              <Input
+                id="impresion-impresor"
+                label="Impresor"
+                type="text"
+                placeholder="ej. Nombre del operario"
+                value={impresor}
+                onChange={(e) => setImpresor(e.target.value)}
+              />
+            </div>
+          </section>
         </div>
 
         <footer className="client-form__actions">
-          <Button type="button" variant="ghost" onClick={onClose}>
-            Cancelar
-          </Button>
           <Button type="submit" variant="primary">
             {assetToEdit ? 'Guardar Cambios' : 'Guardar Cliente'}
+          </Button>
+          <Button type="button" variant="ghost" onClick={onClose}>
+            Cancelar
           </Button>
         </footer>
       </form>
