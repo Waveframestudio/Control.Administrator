@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { usePermissions } from '../../hooks/usePermissions';
 import type { SystemAsset } from '../../types/assets.types';
 
@@ -7,8 +8,28 @@ interface AssetTableProps {
   onDelete: (id: string) => void;
 }
 
+const PAGE_SIZE = 10;
+
 export function AssetTable({ assets, onEdit, onDelete }: AssetTableProps) {
   const { isAdmin } = usePermissions();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever the list of assets (or filter) changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [assets]);
+
+  const totalPages = Math.max(1, Math.ceil(assets.length / PAGE_SIZE));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, assets.length);
+  const paginatedAssets = assets.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const getStatusClass = (status: SystemAsset['status']) => {
     switch (status) {
@@ -81,6 +102,45 @@ export function AssetTable({ assets, onEdit, onDelete }: AssetTableProps) {
     );
   }
 
+  const renderPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (validCurrentPage > 3) pages.push('...');
+      const start = Math.max(2, validCurrentPage - 1);
+      const end = Math.min(totalPages - 1, validCurrentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (validCurrentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    return pages.map((page, idx) => {
+      if (typeof page === 'string') {
+        return (
+          <span
+            key={`ellipsis-${idx}`}
+            className="pagination__btn"
+            style={{ cursor: 'default', border: 'none', background: 'transparent' }}
+          >
+            ...
+          </span>
+        );
+      }
+      return (
+        <button
+          key={page}
+          type="button"
+          className={`pagination__btn ${page === validCurrentPage ? 'pagination__btn--active' : ''}`}
+          onClick={() => handlePageChange(page)}
+        >
+          {page}
+        </button>
+      );
+    });
+  };
+
   return (
     <div className="table-responsive">
       <table className="data-table">
@@ -96,7 +156,7 @@ export function AssetTable({ assets, onEdit, onDelete }: AssetTableProps) {
           </tr>
         </thead>
         <tbody>
-          {assets.map((asset) => (
+          {paginatedAssets.map((asset) => (
             <tr key={asset.id} className="data-table__row">
               <td className="data-table__cell data-table__cell--bold">
                 {asset.name}
@@ -156,6 +216,44 @@ export function AssetTable({ assets, onEdit, onDelete }: AssetTableProps) {
           ))}
         </tbody>
       </table>
+
+      {/* ── Modern Elegant Pagination Bar ── */}
+      <footer className="pagination">
+        <div className="pagination__info">
+          Mostrando <strong>{startIndex + 1}</strong> a <strong>{endIndex}</strong> de{' '}
+          <strong>{assets.length}</strong> clientes
+        </div>
+
+        <nav className="pagination__controls" aria-label="Navegación de páginas">
+          <button
+            type="button"
+            className="pagination__btn pagination__btn--nav"
+            disabled={validCurrentPage === 1}
+            onClick={() => handlePageChange(validCurrentPage - 1)}
+            aria-label="Página anterior"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Anterior
+          </button>
+
+          {renderPageNumbers()}
+
+          <button
+            type="button"
+            className="pagination__btn pagination__btn--nav"
+            disabled={validCurrentPage === totalPages}
+            onClick={() => handlePageChange(validCurrentPage + 1)}
+            aria-label="Página siguiente"
+          >
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </nav>
+      </footer>
     </div>
   );
 }

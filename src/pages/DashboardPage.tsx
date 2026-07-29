@@ -209,6 +209,14 @@ export function DashboardPage() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   return (
     <AppLayout>
       <div className="dashboard">
@@ -223,20 +231,51 @@ export function DashboardPage() {
             </p>
           </div>
 
-          {isAdmin && (
+          <div className="dashboard__header-actions">
             <Button
-              id="btn-new-asset"
-              variant="primary"
+              id="btn-export-pdf"
+              variant="secondary"
               size="md"
-              onClick={handleOpenCreateModal}
+              onClick={handleExportPDF}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
               </svg>
-              Nuevo Cliente
+              Exportar PDF
             </Button>
-          )}
+
+            <Button
+              id="btn-print"
+              variant="secondary"
+              size="md"
+              onClick={handlePrint}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              Imprimir
+            </Button>
+
+            {isAdmin && (
+              <Button
+                id="btn-new-asset"
+                variant="primary"
+                size="md"
+                onClick={handleOpenCreateModal}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nuevo Cliente
+              </Button>
+            )}
+          </div>
         </section>
 
         {/* ── Stats Indicators ── */}

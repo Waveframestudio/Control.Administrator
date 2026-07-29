@@ -587,10 +587,16 @@ textarea.input-group__field--textarea {
 
 .dashboard__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
   animation: fadeIn 0.4s ease-out;
+}
+.dashboard__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 .dashboard__title {
   font-size: var(--font-size-3xl);
@@ -948,6 +954,77 @@ textarea.input-group__field--textarea {
   vertical-align: middle;
 }
 .data-table__row {
+
+/* ─── Modern Pagination ────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background: rgba(15, 23, 42, 0.4);
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.pagination__info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pagination__info strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.pagination__btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--color-accent);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.pagination__btn--active {
+  background: var(--color-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--color-accent) !important;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+.pagination__btn--nav {
+  gap: 4px;
+  padding: 0 12px;
+}
   transition: background-color var(--transition-fast);
 }
 .data-table__row:hover {
