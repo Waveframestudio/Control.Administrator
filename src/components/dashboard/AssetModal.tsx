@@ -249,10 +249,6 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       newErrors.clientName = 'El nombre del cliente es obligatorio.';
     }
 
-    if (!descripcion.trim()) {
-      newErrors.descripcion = 'La descripción del producto es obligatoria.';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -398,8 +394,6 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                 placeholder="Escribe la descripción detallada..."
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                error={errors.descripcion}
-                required
               />
 
               <div className="client-form__row">
@@ -407,8 +401,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   id="product-largo"
                   label="Largo"
                   type="text"
-                  placeholder="ej. 120 cm"
+                  placeholder="ej. 120 cm o n/a"
                   value={largo}
+                  suffix="cm"
                   onChange={(e) => setLargo(e.target.value)}
                 />
                 <Input
@@ -417,6 +412,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   type="text"
                   placeholder="ej. 80 cm"
                   value={ancho}
+                  suffix="cm"
                   onChange={(e) => setAncho(e.target.value)}
                 />
               </div>
@@ -433,24 +429,26 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                 <Input
                   id="product-kilos"
                   label="Cant. Kg."
-                  type="number"
+                  type="text"
                   placeholder="0.00"
                   value={cantidadKilos}
+                  suffix="kg"
                   onChange={(e) => setCantidadKilos(e.target.value)}
                 />
                 <Input
                   id="product-metros"
                   label="Cant. Mts."
-                  type="number"
+                  type="text"
                   placeholder="0.00"
                   value={cantidadMetros}
+                  suffix="mts"
                   onChange={(e) => setCantidadMetros(e.target.value)}
                 />
               </div>
 
               <Textarea
                 id="product-extras"
-                label="Datos extras"
+                label="Observaciones"
                 rows={1}
                 placeholder="Especificaciones adicionales..."
                 value={datosExtras}
@@ -537,17 +535,19 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                 <Input
                   id="extrusion-kg"
                   label="Kg extrudados"
-                  type="number"
+                  type="text"
                   placeholder="0.00"
                   value={kgExtrudados}
+                  suffix="kg"
                   onChange={(e) => setKgExtrudados(e.target.value)}
                 />
                 <Input
                   id="extrusion-mts"
                   label="Mts extrudados"
-                  type="number"
+                  type="text"
                   placeholder="0.00"
                   value={mtsExtrudados}
+                  suffix="mts"
                   onChange={(e) => setMtsExtrudados(e.target.value)}
                 />
                 <Input

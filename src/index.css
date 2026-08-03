@@ -246,6 +246,25 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 0 0 3px var(--color-error-bg);
 }
 
+.input-group__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.input-group__control--has-suffix .input-group__field {
+  padding-right: 48px;
+}
+.input-group__suffix {
+  position: absolute;
+  right: 12px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Hide spin buttons / counter arrows on number inputs */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
