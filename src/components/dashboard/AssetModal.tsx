@@ -83,6 +83,50 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
     setter(formatted);
   };
 
+  /**
+   * Auto-completa el '.' para formato decimal (ej: 114 -> 1.14)
+   * Acepta también punto o coma directo y borrado libre.
+   */
+  const handleDecimalInput = (
+    raw: string,
+    prev: string,
+    setter: (v: string) => void
+  ) => {
+    if (raw.length < prev.length) {
+      setter(raw);
+      return;
+    }
+    if (!raw.trim()) {
+      setter('');
+      return;
+    }
+
+    const clean = raw.replace(',', '.');
+    if (clean.includes('.')) {
+      const parts = clean.split('.');
+      const intPart = parts[0].replace(/[^\d]/g, '');
+      const decPart = parts.slice(1).join('').replace(/[^\d]/g, '').slice(0, 2);
+      setter(`${intPart || '0'}.${decPart}`);
+      return;
+    }
+
+    const digits = clean.replace(/[^\d]/g, '');
+    if (!digits) {
+      setter('');
+      return;
+    }
+
+    if (digits.length === 1) {
+      setter(`0.0${digits}`);
+    } else if (digits.length === 2) {
+      setter(`0.${digits}`);
+    } else {
+      const intPart = digits.slice(0, digits.length - 2).replace(/^0+/, '') || '0';
+      const decPart = digits.slice(digits.length - 2);
+      setter(`${intPart}.${decPart}`);
+    }
+  };
+
   // Parte 1: Producto solicitado
   const [descripcion, setDescripcion] = useState('');
   const [largo, setLargo] = useState('');
@@ -433,7 +477,10 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   placeholder="0.00"
                   value={cantidadKilos}
                   suffix="kg"
-                  onChange={(e) => setCantidadKilos(e.target.value)}
+                  inputMode="decimal"
+                  onChange={(e) =>
+                    handleDecimalInput(e.target.value, cantidadKilos, setCantidadKilos)
+                  }
                 />
                 <Input
                   id="product-metros"
@@ -442,7 +489,10 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   placeholder="0.00"
                   value={cantidadMetros}
                   suffix="mts"
-                  onChange={(e) => setCantidadMetros(e.target.value)}
+                  inputMode="decimal"
+                  onChange={(e) =>
+                    handleDecimalInput(e.target.value, cantidadMetros, setCantidadMetros)
+                  }
                 />
               </div>
 
@@ -502,6 +552,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   value={microperforada}
                   onChange={setMicroperforada}
                 />
+              </div>
+
+              <div className="client-form__row">
                 <Input
                   id="extrusion-tubo"
                   label="Tubo"
@@ -509,17 +562,6 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   placeholder="ej. Tubo 50"
                   value={tubo}
                   onChange={(e) => setTubo(e.target.value)}
-                />
-              </div>
-
-              <div className="client-form__row">
-                <Input
-                  id="extrusion-material-extrudar"
-                  label="Material a extrudar"
-                  type="text"
-                  placeholder="ej. Polietileno"
-                  value={materialExtrudar}
-                  onChange={(e) => setMaterialExtrudar(e.target.value)}
                 />
                 <Input
                   id="extrusion-color-tela"
@@ -530,53 +572,6 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   onChange={(e) => setColorTela(e.target.value)}
                 />
               </div>
-
-              <div className="client-form__row-3">
-                <Input
-                  id="extrusion-kg"
-                  label="Kg extrudados"
-                  type="text"
-                  placeholder="0.00"
-                  value={kgExtrudados}
-                  suffix="kg"
-                  onChange={(e) => setKgExtrudados(e.target.value)}
-                />
-                <Input
-                  id="extrusion-mts"
-                  label="Mts extrudados"
-                  type="text"
-                  placeholder="0.00"
-                  value={mtsExtrudados}
-                  suffix="mts"
-                  onChange={(e) => setMtsExtrudados(e.target.value)}
-                />
-                <Input
-                  id="extrusion-cant-unid"
-                  label="Cant bobinas"
-                  type="number"
-                  placeholder="0"
-                  value={cantUnidExtrusion}
-                  onChange={(e) => setCantUnidExtrusion(e.target.value)}
-                />
-              </div>
-
-              <Input
-                id="extrusion-extrusor"
-                label="Extrusor"
-                type="text"
-                placeholder="ej. Operario / Máquina 01"
-                value={extrusor}
-                onChange={(e) => setExtrusor(e.target.value)}
-              />
-
-              <Textarea
-                id="extrusion-dato-extra"
-                label="Dato extra"
-                rows={1}
-                placeholder="Detalles adicionales de extrusión..."
-                value={datoExtraExtrusion}
-                onChange={(e) => setDatoExtraExtrusion(e.target.value)}
-              />
             </div>
           </section>
 
