@@ -58,6 +58,8 @@ export interface SystemAsset {
   // Impresión
   impresion_caras?: '1 CARA' | '2 CARAS' | '1 cara' | '2 caras';
   colores_impresion?: '1C' | '2C' | '3C' | '4C' | '5C' | '6C';
+  impresion_lateral?: 'SI' | 'NO' | 'si' | 'no';
+  impresion_fondo?: 'SI' | 'NO' | 'si' | 'no';
   metros_por_hora?: string | number;
   t_puesta_a_punto?: string;
   t_impresion?: string;

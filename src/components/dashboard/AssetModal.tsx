@@ -137,13 +137,10 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   // Parte 4: Datos de impresión
   const [impresionCaras, setImpresionCaras] = useState('1 cara');
   const [coloresImpresion, setColoresImpresion] = useState('1C');
-  const [mtsPorHora, setMtsPorHora] = useState('');
-  const [tPuestaAPunto, setTPuestaAPunto] = useState('');
-  const [tImpresion, setTImpresion] = useState('');
+  const [impresionLateral, setImpresionLateral] = useState('no');
+  const [impresionFondo, setImpresionFondo] = useState('no');
   const [cilindro, setCilindro] = useState('');
-  const [bobinasImpresas, setBobinasImpresas] = useState('');
   const [colores, setColores] = useState('');
-  const [impresor, setImpresor] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -200,13 +197,10 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
 
       setImpresionCaras(assetToEdit.impresion_caras || '1 cara');
       setColoresImpresion(assetToEdit.colores_impresion || '1C');
-      setMtsPorHora(assetToEdit.metros_por_hora?.toString() || '');
-      setTPuestaAPunto(assetToEdit.t_puesta_a_punto || '');
-      setTImpresion(assetToEdit.t_impresion || '');
+      setImpresionLateral(assetToEdit.impresion_lateral || 'no');
+      setImpresionFondo(assetToEdit.impresion_fondo || 'no');
       setCilindro(assetToEdit.cilindro || '');
-      setBobinasImpresas(assetToEdit.bobinas_impresas?.toString() || '');
       setColores(assetToEdit.colores_detalle || '');
-      setImpresor(assetToEdit.impresor || '');
       setErrors({});
     } else {
       // Reset form
@@ -247,13 +241,10 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
 
       setImpresionCaras('1 cara');
       setColoresImpresion('1C');
-      setMtsPorHora('');
-      setTPuestaAPunto('');
-      setTImpresion('');
+      setImpresionLateral('no');
+      setImpresionFondo('no');
       setCilindro('');
-      setBobinasImpresas('');
       setColores('');
-      setImpresor('');
       setErrors({});
     }
   }, [assetToEdit, isOpen]);
@@ -317,13 +308,10 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
 
       impresion_caras: impresionCaras as any,
       colores_impresion: coloresImpresion as any,
-      metros_por_hora: mtsPorHora,
-      t_puesta_a_punto: tPuestaAPunto,
-      t_impresion: tImpresion,
+      impresion_lateral: impresionLateral as any,
+      impresion_fondo: impresionFondo as any,
       cilindro,
-      bobinas_impresas: bobinasImpresas,
       colores_detalle: colores,
-      impresor,
     });
   };
 
@@ -516,14 +504,12 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                 />
               </div>
 
-              <div className="client-form__row">
-                <TogglePill
-                  label="Microperforada"
-                  options={SI_NO_OPTIONS}
-                  value={microperforada}
-                  onChange={setMicroperforada}
-                />
-              </div>
+              <TogglePill
+                label="Microperforada"
+                options={SI_NO_OPTIONS}
+                value={microperforada}
+                onChange={setMicroperforada}
+              />
 
               <div className="client-form__row">
                 <Input
@@ -610,22 +596,12 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             </header>
 
             <div className="client-form__fields">
-              <div className="client-form__row">
-                <TogglePill
-                  label="Impresión"
-                  options={IMPRESION_CARAS_OPTIONS}
-                  value={impresionCaras}
-                  onChange={setImpresionCaras}
-                />
-                <Input
-                  id="impresion-mts-hora"
-                  label="Mts por hora"
-                  type="number"
-                  placeholder="0"
-                  value={mtsPorHora}
-                  onChange={(e) => setMtsPorHora(e.target.value)}
-                />
-              </div>
+              <TogglePill
+                label="Impresión"
+                options={IMPRESION_CARAS_OPTIONS}
+                value={impresionCaras}
+                onChange={setImpresionCaras}
+              />
 
               <TogglePill
                 label="1C – 2C – 3C – 4C – 5C – 6C"
@@ -635,42 +611,28 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
               />
 
               <div className="client-form__row">
-                <Input
-                  id="impresion-t-puesta-punto"
-                  label="T puesta a punto"
-                  type="text"
-                  placeholder="ej. 00:30"
-                  value={tPuestaAPunto}
-                  onChange={(e) => setTPuestaAPunto(e.target.value)}
+                <TogglePill
+                  label="Lateral"
+                  options={SI_NO_OPTIONS}
+                  value={impresionLateral}
+                  onChange={setImpresionLateral}
                 />
-                <Input
-                  id="impresion-t-impresion"
-                  label="T de impresión"
-                  type="text"
-                  placeholder="ej. 02:15"
-                  value={tImpresion}
-                  onChange={(e) => setTImpresion(e.target.value)}
+                <TogglePill
+                  label="Fondo"
+                  options={SI_NO_OPTIONS}
+                  value={impresionFondo}
+                  onChange={setImpresionFondo}
                 />
               </div>
 
-              <div className="client-form__row">
-                <Input
-                  id="impresion-cilindro"
-                  label="Cilindro"
-                  type="text"
-                  placeholder="ej. C-12"
-                  value={cilindro}
-                  onChange={(e) => setCilindro(e.target.value)}
-                />
-                <Input
-                  id="impresion-bobinas"
-                  label="Bobinas impresas"
-                  type="number"
-                  placeholder="0"
-                  value={bobinasImpresas}
-                  onChange={(e) => setBobinasImpresas(e.target.value)}
-                />
-              </div>
+              <Input
+                id="impresion-cilindro"
+                label="Cilindro"
+                type="text"
+                placeholder="ej. C-12"
+                value={cilindro}
+                onChange={(e) => setCilindro(e.target.value)}
+              />
 
               <Input
                 id="impresion-colores"
@@ -679,15 +641,6 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                 placeholder="ej. Rojo, azul, blanco"
                 value={colores}
                 onChange={(e) => setColores(e.target.value)}
-              />
-
-              <Input
-                id="impresion-impresor"
-                label="Impresor"
-                type="text"
-                placeholder="ej. Nombre del operario"
-                value={impresor}
-                onChange={(e) => setImpresor(e.target.value)}
               />
             </div>
           </section>
