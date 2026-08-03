@@ -67,7 +67,7 @@ export function LoginPage() {
         <Card.Header>
           <h1 className="login-card__title">Iniciar Sesión</h1>
           <p className="login-card__subtitle">
-            Ingresa tus credenciales para acceder al sistema
+            Ingresa tus credenciales para acceder al sistema.
           </p>
         </Card.Header>
 
