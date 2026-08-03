@@ -28,13 +28,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* ── Top Navigation ── */}
       <header className="app-nav">
         <div className="app-nav__brand">
-          <div className="app-nav__logo" aria-label="App logo">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <rect width="32" height="32" rx="8" fill="#3B82F6" />
-              <path d="M8 16L14 22L24 10" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <span className="app-nav__brand-name">Control Administrator</span>
+          <img
+            src="/logo.png"
+            alt="RD Plast Logo"
+            style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '50%' }}
+          />
+          <span className="app-nav__brand-name">RD Plast</span>
         </div>
 
         <nav className="app-nav__links" aria-label="Main navigation">
@@ -73,7 +72,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* ── Footer ── */}
       <footer className="app-footer">
         <p className="app-footer__text">
-          &copy; 2026 Control Administrator todos los derechos reservados. | Desarrollado por{' '}
+          &copy; 2026 RD Plast todos los derechos reservados. | Desarrollado por{' '}
           <a
             href="https://waveframe.com.ar/"
             target="_blank"
