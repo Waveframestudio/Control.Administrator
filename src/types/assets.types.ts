@@ -12,6 +12,7 @@ export interface SystemAsset {
   last_inspected: string;
 
   // Campos de Ficha Técnica (Orden de Producción)
+  client_id?: string;
   fecha_comienzo?: string;
   fecha_fin?: string;
   fecha_entrega?: string;

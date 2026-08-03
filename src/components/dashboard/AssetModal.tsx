@@ -51,9 +51,37 @@ const COLORES_OPTIONS = [
 export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
   // Campos del encabezado horizontal
   const [clientName, setClientName] = useState('');
+  const [clientId, setClientId] = useState('');
   const [fechaComienzo, setFechaComienzo] = useState('');
   const [fechaFin, setFechaFin] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
+
+  /**
+   * Mascara de fecha: auto-inserta '/' al tipear solo dígitos.
+   * Resultado: dd/mm/aaaa
+   */
+  const handleDateInput = (
+    raw: string,
+    prev: string,
+    setter: (v: string) => void
+  ) => {
+    // Permitir borrado libre
+    if (raw.length < prev.length) {
+      setter(raw);
+      return;
+    }
+    // Solo dígitos y '/' (filtra el resto)
+    const digits = raw.replace(/[^\d]/g, '');
+    let formatted = '';
+    if (digits.length <= 2) {
+      formatted = digits;
+    } else if (digits.length <= 4) {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    } else {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+    }
+    setter(formatted);
+  };
 
   // Parte 1: Producto solicitado
   const [descripcion, setDescripcion] = useState('');
@@ -118,6 +146,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   useEffect(() => {
     if (assetToEdit) {
       setClientName(assetToEdit.name || '');
+      setClientId(assetToEdit.client_id || '');
       setFechaComienzo(toDMY(assetToEdit.fecha_comienzo));
       setFechaFin(toDMY(assetToEdit.fecha_fin));
       setDeliveryDate(toDMY(assetToEdit.fecha_entrega));
@@ -165,6 +194,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
     } else {
       // Reset form
       setClientName('');
+      setClientId('');
       setFechaComienzo('');
       setFechaFin('');
       setDeliveryDate('');
@@ -234,6 +264,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
     onSubmit({
       id: assetToEdit?.id,
       name: clientName.trim(),
+      client_id: clientId.trim(),
       ip_address: descripcion.trim(),
       category: 'Workstation',
       status: 'Active',
@@ -293,7 +324,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       size="xl"
     >
       <form onSubmit={handleSubmit} noValidate className="client-form">
-        {/* ── Encabezado superior a lo largo (4 campos en una sola línea) ── */}
+        {/* ── Encabezado superior a lo largo (5 campos en una sola línea) ── */}
         <div className="client-form__top-bar">
           <Input
             id="top-cliente"
@@ -306,12 +337,24 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             required
           />
           <Input
+            id="top-cliente-id"
+            label="ID Cliente"
+            type="text"
+            placeholder="ej. 00123"
+            value={clientId}
+            onChange={(e) => setClientId(e.target.value)}
+          />
+          <Input
             id="top-fecha-comienzo"
             label="Fecha comienzo"
             type="text"
             placeholder="dd/mm/aaaa"
             value={fechaComienzo}
-            onChange={(e) => setFechaComienzo(e.target.value)}
+            inputMode="numeric"
+            maxLength={10}
+            onChange={(e) =>
+              handleDateInput(e.target.value, fechaComienzo, setFechaComienzo)
+            }
           />
           <Input
             id="top-fecha-fin"
@@ -319,7 +362,11 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             type="text"
             placeholder="dd/mm/aaaa"
             value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
+            inputMode="numeric"
+            maxLength={10}
+            onChange={(e) =>
+              handleDateInput(e.target.value, fechaFin, setFechaFin)
+            }
           />
           <Input
             id="top-fecha-entrega"
@@ -327,7 +374,11 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             type="text"
             placeholder="dd/mm/aaaa"
             value={deliveryDate}
-            onChange={(e) => setDeliveryDate(e.target.value)}
+            inputMode="numeric"
+            maxLength={10}
+            onChange={(e) =>
+              handleDateInput(e.target.value, deliveryDate, setDeliveryDate)
+            }
           />
         </div>
 
