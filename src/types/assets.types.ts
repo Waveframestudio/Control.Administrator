@@ -47,6 +47,9 @@ export interface SystemAsset {
   corte?: 'LATERAL' | 'FONDO' | 'Lateral' | 'Fondo';
   golpes_por_minuto?: string | number;
   pista?: 'SIMPLE' | 'DOBLE' | 'TRIPLE' | 'Simple' | 'Doble' | 'Triple';
+  fuelle_confeccion?: 'SI' | 'NO' | 'si' | 'no';
+  perforado?: 'SI' | 'NO' | 'si' | 'no';
+  bolsa_exhibidora?: 'SI' | 'NO' | 'si' | 'no';
   dato_extra_confeccion?: string;
   cantidad_resultante?: string | number;
   bultos?: string | number;

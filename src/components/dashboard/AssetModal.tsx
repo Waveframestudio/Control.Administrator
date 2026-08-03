@@ -84,47 +84,22 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   };
 
   /**
-   * Auto-completa el '.' para formato decimal (ej: 114 -> 1.14)
-   * Acepta también punto o coma directo y borrado libre.
+   * Permite ingresar números con punto o coma decimal (hasta 2 decimales).
    */
   const handleDecimalInput = (
     raw: string,
-    prev: string,
     setter: (v: string) => void
   ) => {
-    if (raw.length < prev.length) {
-      setter(raw);
-      return;
+    let clean = raw.replace(',', '.');
+    clean = clean.replace(/[^0-9.]/g, '');
+    const parts = clean.split('.');
+    if (parts.length > 2) {
+      clean = parts[0] + '.' + parts.slice(1).join('');
     }
-    if (!raw.trim()) {
-      setter('');
-      return;
+    if (parts.length === 2 && parts[1].length > 2) {
+      clean = `${parts[0]}.${parts[1].slice(0, 2)}`;
     }
-
-    const clean = raw.replace(',', '.');
-    if (clean.includes('.')) {
-      const parts = clean.split('.');
-      const intPart = parts[0].replace(/[^\d]/g, '');
-      const decPart = parts.slice(1).join('').replace(/[^\d]/g, '').slice(0, 2);
-      setter(`${intPart || '0'}.${decPart}`);
-      return;
-    }
-
-    const digits = clean.replace(/[^\d]/g, '');
-    if (!digits) {
-      setter('');
-      return;
-    }
-
-    if (digits.length === 1) {
-      setter(`0.0${digits}`);
-    } else if (digits.length === 2) {
-      setter(`0.${digits}`);
-    } else {
-      const intPart = digits.slice(0, digits.length - 2).replace(/^0+/, '') || '0';
-      const decPart = digits.slice(digits.length - 2);
-      setter(`${intPart}.${decPart}`);
-    }
+    setter(clean);
   };
 
   // Parte 1: Producto solicitado
@@ -155,10 +130,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   const [corte, setCorte] = useState('Lateral');
   const [golpePorMinuto, setGolpePorMinuto] = useState('');
   const [pista, setPista] = useState('Simple');
-  const [datoExtraConfeccion, setDatoExtraConfeccion] = useState('');
-  const [cantResultante, setCantResultante] = useState('');
-  const [bultos, setBultos] = useState('');
-  const [confeccionista, setConfeccionista] = useState('');
+  const [fuelleConfeccion, setFuelleConfeccion] = useState('no');
+  const [perforado, setPerforado] = useState('no');
+  const [bolsaExhibidora, setBolsaExhibidora] = useState('no');
 
   // Parte 4: Datos de impresión
   const [impresionCaras, setImpresionCaras] = useState('1 cara');
@@ -220,10 +194,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       setCorte(assetToEdit.corte || 'Lateral');
       setGolpePorMinuto(assetToEdit.golpes_por_minuto?.toString() || '');
       setPista(assetToEdit.pista || 'Simple');
-      setDatoExtraConfeccion(assetToEdit.dato_extra_confeccion || '');
-      setCantResultante(assetToEdit.cantidad_resultante?.toString() || '');
-      setBultos(assetToEdit.bultos?.toString() || '');
-      setConfeccionista(assetToEdit.confeccionista || '');
+      setFuelleConfeccion(assetToEdit.fuelle_confeccion || 'no');
+      setPerforado(assetToEdit.perforado || 'no');
+      setBolsaExhibidora(assetToEdit.bolsa_exhibidora || 'no');
 
       setImpresionCaras(assetToEdit.impresion_caras || '1 cara');
       setColoresImpresion(assetToEdit.colores_impresion || '1C');
@@ -268,10 +241,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       setCorte('Lateral');
       setGolpePorMinuto('');
       setPista('Simple');
-      setDatoExtraConfeccion('');
-      setCantResultante('');
-      setBultos('');
-      setConfeccionista('');
+      setFuelleConfeccion('no');
+      setPerforado('no');
+      setBolsaExhibidora('no');
 
       setImpresionCaras('1 cara');
       setColoresImpresion('1C');
@@ -339,10 +311,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       corte: corte as any,
       golpes_por_minuto: golpePorMinuto,
       pista: pista as any,
-      dato_extra_confeccion: datoExtraConfeccion,
-      cantidad_resultante: cantResultante,
-      bultos,
-      confeccionista,
+      fuelle_confeccion: fuelleConfeccion as any,
+      perforado: perforado as any,
+      bolsa_exhibidora: bolsaExhibidora as any,
 
       impresion_caras: impresionCaras as any,
       colores_impresion: coloresImpresion as any,
@@ -479,7 +450,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   suffix="kg"
                   inputMode="decimal"
                   onChange={(e) =>
-                    handleDecimalInput(e.target.value, cantidadKilos, setCantidadKilos)
+                    handleDecimalInput(e.target.value, setCantidadKilos)
                   }
                 />
                 <Input
@@ -491,7 +462,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
                   suffix="mts"
                   inputMode="decimal"
                   onChange={(e) =>
-                    handleDecimalInput(e.target.value, cantidadMetros, setCantidadMetros)
+                    handleDecimalInput(e.target.value, setCantidadMetros)
                   }
                 />
               </div>
@@ -608,40 +579,25 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
               />
 
               <div className="client-form__row">
-                <Input
-                  id="confeccion-cant-resultante"
-                  label="Cant resultante"
-                  type="number"
-                  placeholder="0"
-                  value={cantResultante}
-                  onChange={(e) => setCantResultante(e.target.value)}
+                <TogglePill
+                  label="Fuelle"
+                  options={SI_NO_OPTIONS}
+                  value={fuelleConfeccion}
+                  onChange={setFuelleConfeccion}
                 />
-                <Input
-                  id="confeccion-bultos"
-                  label="Bultos"
-                  type="number"
-                  placeholder="0"
-                  value={bultos}
-                  onChange={(e) => setBultos(e.target.value)}
+                <TogglePill
+                  label="Perforado"
+                  options={SI_NO_OPTIONS}
+                  value={perforado}
+                  onChange={setPerforado}
                 />
               </div>
 
-              <Input
-                id="confeccion-confeccionista"
-                label="Confeccionista"
-                type="text"
-                placeholder="ej. Nombre del operario"
-                value={confeccionista}
-                onChange={(e) => setConfeccionista(e.target.value)}
-              />
-
-              <Textarea
-                id="confeccion-dato-extra"
-                label="Dato extra"
-                rows={1}
-                placeholder="Detalles adicionales de confección..."
-                value={datoExtraConfeccion}
-                onChange={(e) => setDatoExtraConfeccion(e.target.value)}
+              <TogglePill
+                label="Bolsa exhibidora"
+                options={SI_NO_OPTIONS}
+                value={bolsaExhibidora}
+                onChange={setBolsaExhibidora}
               />
             </div>
           </section>
