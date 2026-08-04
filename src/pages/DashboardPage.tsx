@@ -21,9 +21,7 @@ export function DashboardPage() {
 
   const [filters, setFilters] = useState<AssetFiltersState>({
     search: '',
-    category: 'all',
-    status: 'all',
-    criticality: 'all',
+    field: 'all',
   });
 
   // Modal State
@@ -93,22 +91,70 @@ export function DashboardPage() {
 
   // ── Filter Assets ──────────────────────────────────────────────────────────
   const filteredAssets = useMemo(() => {
+    const query = filters.search.toLowerCase().trim();
+    const selectedField = filters.field || 'all';
+
+    const formatDateStr = (val?: string | null) => {
+      if (!val) return '';
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return val;
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    };
+
+    const getStatusLabel = (status?: string) => {
+      switch (status) {
+        case 'Active': return 'En proceso';
+        case 'Maintenance': return 'Finalizado';
+        case 'Offline': return 'Entregado';
+        default: return status || '';
+      }
+    };
+
     return assets.filter((asset) => {
-      const searchMatch =
-        filters.search === '' ||
-        asset.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        asset.ip_address.toLowerCase().includes(filters.search.toLowerCase());
+      if (!query) return true;
 
-      const categoryMatch =
-        filters.category === 'all' || asset.category === filters.category;
+      const matchText = (val?: string | null) => {
+        if (!val) return false;
+        return val.toLowerCase().includes(query);
+      };
 
-      const statusMatch =
-        filters.status === 'all' || asset.status === filters.status;
+      const matchDate = (dateVal?: string | null) => {
+        if (!dateVal) return false;
+        const formatted = formatDateStr(dateVal);
+        return dateVal.toLowerCase().includes(query) || formatted.includes(query);
+      };
 
-      const criticalityMatch =
-        filters.criticality === 'all' || asset.criticality === filters.criticality;
-
-      return searchMatch && categoryMatch && statusMatch && criticalityMatch;
+      switch (selectedField) {
+        case 'client_id':
+          return matchText(asset.client_id);
+        case 'name':
+          return matchText(asset.name);
+        case 'producto':
+          return matchText(asset.producto);
+        case 'status':
+          return matchText(getStatusLabel(asset.status)) || matchText(asset.status);
+        case 'fecha_comienzo':
+          return matchDate(asset.fecha_comienzo);
+        case 'fecha_fin':
+          return matchDate(asset.fecha_fin);
+        case 'fecha_entrega':
+          return matchDate(asset.fecha_entrega);
+        case 'all':
+        default:
+          return (
+            matchText(asset.client_id) ||
+            matchText(asset.name) ||
+            matchText(asset.producto) ||
+            matchText(getStatusLabel(asset.status)) ||
+            matchText(asset.status) ||
+            matchDate(asset.fecha_comienzo) ||
+            matchDate(asset.fecha_fin) ||
+            matchDate(asset.fecha_entrega) ||
+            matchText(asset.descripcion) ||
+            matchText(asset.ip_address)
+          );
+      }
     });
   }, [assets, filters]);
 

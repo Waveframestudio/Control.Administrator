@@ -77,9 +77,7 @@ export interface SystemAsset {
 
 export interface AssetFiltersState {
   search: string;
-  category: string; // 'all' or AssetCategory
-  status: string;   // 'all' or AssetStatus
-  criticality: string; // 'all' or AssetCriticality
+  field: string; // 'all' | 'client_id' | 'name' | 'producto' | 'status' | 'fecha_comienzo' | 'fecha_fin' | 'fecha_entrega'
 }
 
 export interface AssetStatsData {

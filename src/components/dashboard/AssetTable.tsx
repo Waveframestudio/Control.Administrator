@@ -132,6 +132,7 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Estado</th>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha inicio</th>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha fin</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha entrega</th>
             <th scope="col" className="text-right" style={{ whiteSpace: 'nowrap' }}>Acciones</th>
           </tr>
         </thead>
@@ -168,6 +169,11 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
               {/* Fecha fin */}
               <td className="data-table__cell text-muted">
                 {formatDate(asset.fecha_fin)}
+              </td>
+
+              {/* Fecha entrega */}
+              <td className="data-table__cell text-muted">
+                {formatDate(asset.fecha_entrega)}
               </td>
 
               {/* Acciones – icon only */}

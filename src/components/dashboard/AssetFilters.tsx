@@ -12,28 +12,23 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
     onChange({ ...filters, search: e.target.value });
   };
 
-  const handleSelectChange = (key: keyof Omit<AssetFiltersState, 'search'>) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange({ ...filters, [key]: e.target.value });
+  const handleFieldChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange({ ...filters, field: e.target.value });
   };
 
   const handleReset = () => {
     onChange({
       search: '',
-      category: 'all',
-      status: 'all',
-      criticality: 'all',
+      field: 'all',
     });
   };
 
-  const hasActiveFilters =
-    filters.search !== '' ||
-    filters.category !== 'all' ||
-    filters.status !== 'all';
+  const hasActiveFilters = filters.search !== '' || filters.field !== 'all';
 
   return (
     <div className="filters-bar">
       <div className="filters-bar__inputs">
-        {/* Search */}
+        {/* Search Input */}
         <div className="filters-bar__search">
           <Input
             id="filter-search"
@@ -44,31 +39,20 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
           />
         </div>
 
-        {/* Category */}
+        {/* Field Filter Select */}
         <Select
-          id="filter-category"
-          value={filters.category}
-          onChange={handleSelectChange('category')}
+          id="filter-field"
+          value={filters.field || 'all'}
+          onChange={handleFieldChange}
           options={[
-            { value: 'all', label: 'Todos los Tipos' },
-            { value: 'Server', label: 'Polietileno' },
-            { value: 'Workstation', label: 'Bolsa / Lámina' },
-            { value: 'Database', label: 'Bobina / Tubo' },
-            { value: 'Network', label: 'Impresos' },
-          ]}
-          className="filter-select"
-        />
-
-        {/* Status */}
-        <Select
-          id="filter-status"
-          value={filters.status}
-          onChange={handleSelectChange('status')}
-          options={[
-            { value: 'all', label: 'Todos los Estados' },
-            { value: 'Active', label: 'Activo' },
-            { value: 'Maintenance', label: 'Mantenimiento' },
-            { value: 'Offline', label: 'Fuera de línea' },
+            { value: 'all', label: 'Todos los campos' },
+            { value: 'client_id', label: 'ID Cliente' },
+            { value: 'name', label: 'Cliente' },
+            { value: 'producto', label: 'Producto' },
+            { value: 'status', label: 'Estado' },
+            { value: 'fecha_comienzo', label: 'Fecha inicio' },
+            { value: 'fecha_fin', label: 'Fecha fin' },
+            { value: 'fecha_entrega', label: 'Fecha entrega' },
           ]}
           className="filter-select"
         />
