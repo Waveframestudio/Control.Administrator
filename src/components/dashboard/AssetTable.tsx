@@ -128,6 +128,7 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
           <tr>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>ID Cliente</th>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Cliente</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>Producto</th>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Estado</th>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha inicio</th>
             <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha fin</th>
@@ -145,6 +146,11 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
               {/* Cliente */}
               <td className="data-table__cell data-table__cell--bold">
                 {asset.name}
+              </td>
+
+              {/* Producto */}
+              <td className="data-table__cell">
+                {asset.producto || '—'}
               </td>
 
               {/* Estado */}

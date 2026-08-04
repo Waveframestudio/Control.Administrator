@@ -103,6 +103,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
   };
 
   // Parte 1: Producto solicitado
+  const [producto, setProducto] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [largo, setLargo] = useState('');
   const [ancho, setAncho] = useState('');
@@ -167,6 +168,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       setDeliveryDate(toDMY(assetToEdit.fecha_entrega));
 
       setDescripcion(assetToEdit.descripcion || assetToEdit.ip_address || '');
+      setProducto(assetToEdit.producto || '');
       setLargo(assetToEdit.largo || '');
       setAncho(assetToEdit.ancho || '');
       setCantidadUnidades(assetToEdit.cantidad_unidades?.toString() || '');
@@ -211,6 +213,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       setDeliveryDate('');
 
       setDescripcion('');
+      setProducto('');
       setLargo('');
       setAncho('');
       setCantidadUnidades('');
@@ -256,6 +259,14 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       newErrors.clientName = 'El nombre del cliente es obligatorio.';
     }
 
+    if (!clientId.trim()) {
+      newErrors.clientId = 'El ID de cliente es obligatorio.';
+    }
+
+    if (!producto.trim()) {
+      newErrors.producto = 'El producto es obligatorio.';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -277,6 +288,7 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       fecha_fin: fechaFin,
       fecha_entrega: deliveryDate,
 
+      producto: producto.trim(),
       descripcion: descripcion.trim(),
       largo,
       ancho,
@@ -342,6 +354,8 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             placeholder="ej. 00123"
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
+            error={errors.clientId}
+            required
           />
           <Input
             id="top-fecha-comienzo"
@@ -390,6 +404,17 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
             </header>
 
             <div className="client-form__fields">
+              <Input
+                id="product-nombre"
+                label="Producto"
+                type="text"
+                placeholder="ej. Bolsa polietileno 30x40"
+                value={producto}
+                onChange={(e) => setProducto(e.target.value)}
+                error={errors.producto}
+                required
+              />
+
               <Textarea
                 id="product-description"
                 label="Descripción"

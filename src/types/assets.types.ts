@@ -17,6 +17,9 @@ export interface SystemAsset {
   fecha_fin?: string;
   fecha_entrega?: string;
 
+  // Producto
+  producto?: string;
+
   // Producto Solicitado
   descripcion?: string;
   ancho?: string;
