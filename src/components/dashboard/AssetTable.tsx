@@ -32,7 +32,8 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
     }
   };
 
-  const getStatusClass = (status: SystemAsset['status']) => {
+  // ── Status helpers ─────────────────────────────────────────────────────────
+  const getStatusClass = (status: SystemAsset['status']): string => {
     switch (status) {
       case 'Active':
         return 'badge--status-active';
@@ -45,48 +46,26 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
     }
   };
 
-  const getCriticalityClass = (crit: SystemAsset['criticality']) => {
-    switch (crit) {
-      case 'Low':
-        return 'badge--crit-low';
-      case 'Medium':
-        return 'badge--crit-medium';
-      case 'High':
-        return 'badge--crit-high';
-      case 'Critical':
-        return 'badge--crit-critical';
+  const getStatusLabel = (status: SystemAsset['status']): string => {
+    switch (status) {
+      case 'Active':
+        return 'En proceso';
+      case 'Maintenance':
+        return 'Finalizado';
+      case 'Offline':
+        return 'Entregado';
       default:
-        return '';
+        return status;
     }
   };
 
-  const translateCategory = (cat: SystemAsset['category']) => {
-    const map: Record<SystemAsset['category'], string> = {
-      Server: 'Servidor',
-      Workstation: 'Estación de Trabajo',
-      Database: 'Base de Datos',
-      Network: 'Red',
-    };
-    return map[cat] || cat;
-  };
-
-  const translateStatus = (stat: SystemAsset['status']) => {
-    const map: Record<SystemAsset['status'], string> = {
-      Active: 'Activo',
-      Maintenance: 'Mantenimiento',
-      Offline: 'Fuera de línea',
-    };
-    return map[stat] || stat;
-  };
-
-  const translateCriticality = (crit: SystemAsset['criticality']) => {
-    const map: Record<SystemAsset['criticality'], string> = {
-      Low: 'Baja',
-      Medium: 'Media',
-      High: 'Alta',
-      Critical: 'Crítica',
-    };
-    return map[crit] || crit;
+  // ── Date formatter: dd/mm/aaaa (no time) ───────────────────────────────────
+  const formatDate = (dateStr: string | undefined | null): string => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
   };
 
   if (assets.length === 0) {
@@ -147,40 +126,45 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
       <table className="data-table">
         <thead>
           <tr>
-            <th scope="col">Cliente</th>
-            <th scope="col">Descripción / Producto</th>
-            <th scope="col">Tipo</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Prioridad</th>
-            <th scope="col">Fecha Registro</th>
-            <th scope="col" className="text-right">Acciones</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>ID Cliente</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>Cliente</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>Estado</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha inicio</th>
+            <th scope="col" style={{ whiteSpace: 'nowrap' }}>Fecha fin</th>
+            <th scope="col" className="text-right" style={{ whiteSpace: 'nowrap' }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {paginatedAssets.map((asset) => (
             <tr key={asset.id} className="data-table__row">
+              {/* ID Cliente */}
+              <td className="data-table__cell text-muted">
+                {asset.client_id || '—'}
+              </td>
+
+              {/* Cliente */}
               <td className="data-table__cell data-table__cell--bold">
                 {asset.name}
               </td>
-              <td className="data-table__cell">
-                {asset.descripcion || asset.ip_address}
-              </td>
-              <td className="data-table__cell">
-                {translateCategory(asset.category)}
-              </td>
+
+              {/* Estado */}
               <td className="data-table__cell">
                 <span className={`badge ${getStatusClass(asset.status)}`}>
-                  {translateStatus(asset.status)}
+                  {getStatusLabel(asset.status)}
                 </span>
               </td>
-              <td className="data-table__cell">
-                <span className={`badge ${getCriticalityClass(asset.criticality)}`}>
-                  {translateCriticality(asset.criticality)}
-                </span>
-              </td>
+
+              {/* Fecha inicio */}
               <td className="data-table__cell text-muted">
-                {asset.last_inspected}
+                {formatDate(asset.fecha_comienzo)}
               </td>
+
+              {/* Fecha fin */}
+              <td className="data-table__cell text-muted">
+                {formatDate(asset.fecha_fin)}
+              </td>
+
+              {/* Acciones – icon only */}
               <td className="data-table__cell text-right">
                 <div className="table-actions">
                   {onPrintIndividual && (
@@ -196,7 +180,6 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
                         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                         <rect x="6" y="14" width="12" height="8"></rect>
                       </svg>
-                      Ficha
                     </button>
                   )}
                   {isAdmin && (
@@ -206,18 +189,19 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
                         className="table-btn table-btn--edit"
                         onClick={() => onEdit(asset)}
                         aria-label={`Editar ${asset.name}`}
+                        title="Editar"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                           <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
-                        Editar
                       </button>
                       <button
                         type="button"
                         className="table-btn table-btn--danger"
                         onClick={() => onDelete(asset.id)}
                         aria-label={`Eliminar ${asset.name}`}
+                        title="Eliminar"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="3 6 5 6 21 6"></polyline>
@@ -225,7 +209,6 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
                           <line x1="10" y1="11" x2="10" y2="17"></line>
                           <line x1="14" y1="11" x2="14" y2="17"></line>
                         </svg>
-                        Eliminar
                       </button>
                     </>
                   )}
@@ -236,7 +219,7 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
         </tbody>
       </table>
 
-      {/* ── Modern Elegant Pagination Bar ── */}
+      {/* ── Pagination Bar ── */}
       <footer className="pagination">
         <div className="pagination__info">
           Mostrando <strong>{startIndex + 1}</strong> a <strong>{endIndex}</strong> de{' '}

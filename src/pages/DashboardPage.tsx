@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AppLayout } from '../layouts/AppLayout';
 import { Button } from '../components/ui/Button';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { AssetStats } from '../components/dashboard/AssetStats';
 import { AssetFilters } from '../components/dashboard/AssetFilters';
 import { AssetTable } from '../components/dashboard/AssetTable';
@@ -28,6 +29,10 @@ export function DashboardPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState<SystemAsset | null>(null);
+
+  // Delete Confirm Dialog State
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // Print State
   const [selectedClientForPrint, setSelectedClientForPrint] = useState<SystemAsset | null>(null);
@@ -185,24 +190,36 @@ export function DashboardPage() {
     }
   };
 
-  const handleDeleteAsset = async (id: string) => {
+  const handleDeleteAsset = (id: string) => {
     if (!isAdmin) return;
-    if (window.confirm('¿Estás seguro de que deseas eliminar este activo?')) {
-      try {
-        setError(null);
-        const { error: deleteError } = await supabase
-          .from('assets')
-          .delete()
-          .eq('id', id);
+    setPendingDeleteId(id);
+    setConfirmOpen(true);
+  };
 
-        if (deleteError) throw new Error(deleteError.message);
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    setConfirmOpen(false);
+    try {
+      setError(null);
+      const { error: deleteError } = await supabase
+        .from('assets')
+        .delete()
+        .eq('id', pendingDeleteId);
 
-        setAssets((prev) => prev.filter((asset) => asset.id !== id));
-      } catch (err: any) {
-        console.error('[DashboardPage] Error deleting asset:', err);
-        alert(`Error al eliminar el activo: ${err.message}`);
-      }
+      if (deleteError) throw new Error(deleteError.message);
+
+      setAssets((prev) => prev.filter((asset) => asset.id !== pendingDeleteId));
+    } catch (err: any) {
+      console.error('[DashboardPage] Error deleting asset:', err);
+      alert(`Error al eliminar el cliente: ${err.message}`);
+    } finally {
+      setPendingDeleteId(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmOpen(false);
+    setPendingDeleteId(null);
   };
 
   // ── Print Handlers ────────────────────────────────────────────────────────
@@ -332,6 +349,17 @@ export function DashboardPage() {
             assetToEdit={assetToEdit}
           />
         )}
+
+        {/* ── Delete Confirmation Dialog ── */}
+        <ConfirmDialog
+          isOpen={confirmOpen}
+          title="Eliminar cliente"
+          message="¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer."
+          confirmLabel="Sí, eliminar"
+          cancelLabel="Cancelar"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
 
         {/* ── Printable Technical Sheets Container (Hidden on Screen, Visible on Print) ── */}
         <div className="printable-sheets-area">
