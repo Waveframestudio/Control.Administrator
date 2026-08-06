@@ -10,6 +10,8 @@ import { ClientPrintSheet } from '../components/dashboard/ClientPrintSheet';
 import { usePermissions } from '../hooks/usePermissions';
 import { supabase } from '../lib/supabase';
 import type { SystemAsset, AssetFiltersState, AssetStatsData } from '../types/assets.types';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 export function DashboardPage() {
   const { isAdmin } = usePermissions();
@@ -268,19 +270,68 @@ export function DashboardPage() {
     setPendingDeleteId(null);
   };
 
-  // ── Print Handlers ────────────────────────────────────────────────────────
+  // ── PDF & Print Handlers (Using html2pdf for 100% identical PDF & Print output) ──
+  const generatePDF = (
+    mode: 'download' | 'print',
+    filename = 'Fichas_Clientes.pdf',
+    orientation: 'landscape' | 'portrait' = 'landscape'
+  ) => {
+    const element = document.querySelector('.printable-sheets-area');
+    if (!element) return;
+
+    // Clone the element and make it visible for html2pdf
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.style.display = 'block';
+    clone.style.position = 'relative';
+    clone.style.left = '0';
+    clone.style.top = '0';
+
+    const opt: any = {
+      margin:       4,
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { 
+        scale: 2, 
+        useCORS: true, 
+        logging: false,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: orientation },
+      pagebreak:    { mode: ['css', 'legacy'] }
+    };
+
+    const worker = html2pdf().from(clone).set(opt);
+
+    if (mode === 'download') {
+      worker.save();
+    } else {
+      worker.toPdf().get('pdf').then((pdf: any) => {
+        pdf.autoPrint();
+        const blobUrl = pdf.output('bloburl');
+        window.open(blobUrl, '_blank');
+      });
+    }
+  };
+
   const handlePrintAll = () => {
     setSelectedClientForPrint(null);
     setTimeout(() => {
-      window.print();
-    }, 100);
+      generatePDF('print', 'Fichas_Clientes.pdf', 'landscape');
+    }, 50);
+  };
+
+  const handleExportPDF = () => {
+    setSelectedClientForPrint(null);
+    setTimeout(() => {
+      generatePDF('download', 'Fichas_Clientes.pdf', 'landscape');
+    }, 50);
   };
 
   const handlePrintIndividual = (client: SystemAsset) => {
     setSelectedClientForPrint(client);
     setTimeout(() => {
-      window.print();
-    }, 100);
+      generatePDF('print', `Ficha_${client.name || 'Cliente'}.pdf`, 'landscape');
+    }, 50);
   };
 
   // ── Batch Print Pairs (2 clients per page) ────────────────────────────────
@@ -311,7 +362,7 @@ export function DashboardPage() {
               id="btn-export-pdf"
               variant="secondary"
               size="md"
-              onClick={handlePrintAll}
+              onClick={handleExportPDF}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -410,7 +461,7 @@ export function DashboardPage() {
         {/* ── Printable Technical Sheets Container (Hidden on Screen, Visible on Print) ── */}
         <div className="printable-sheets-area">
           {selectedClientForPrint ? (
-            <div className="print-page-pair">
+            <div className="print-page-pair print-page-pair--single">
               <div className="print-sheet-item">
                 <ClientPrintSheet asset={selectedClientForPrint} />
               </div>

@@ -38,9 +38,8 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
   const carasExtrusion = asset.caras_extrusion || '1 cara';
   const corteVal = asset.corte?.toUpperCase() || 'LATERAL';
   const pistaVal = asset.pista?.toUpperCase() || 'SIMPLE';
-
-  const impresionCaras = asset.impresion_caras?.toUpperCase() || '1 CARA';
-  const coloresImp = asset.colores_impresion?.toUpperCase() || '1C';
+  const impresionCaras = (asset.impresion_caras || '1 CARA').toUpperCase();
+  const coloresImp = (asset.colores_impresion || '').toUpperCase();
 
   return (
     <div className="print-sheet-container">
@@ -48,8 +47,18 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
         {/* ── Encabezado Principal ── */}
         <div className="print-sheet__header">
           <div className="print-sheet__header-cell print-sheet__header-cell--cliente">
-            <span className="print-label">CLIENTE:</span>
-            <span className="print-value">{asset.name || ''}</span>
+            <img src="/logo.png" alt="RD Plast" className="print-sheet__logo" style={{ width: '18px', height: '18px', maxWidth: '18px', maxHeight: '18px', objectFit: 'contain', marginRight: '6px' }} />
+            <div className="print-client-box">
+              <div className="print-client-row">
+                <span className="print-label">CLIENTE:</span>
+                <span className="print-value">{asset.name || ''}</span>
+              </div>
+              {asset.client_id ? (
+                <div className="print-client-id">
+                  ID: {asset.client_id}
+                </div>
+              ) : null}
+            </div>
           </div>
           <div className="print-sheet__header-cell">
             <span className="print-label">FECHA COMIENZO:</span>
@@ -71,6 +80,13 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
           <div className="print-sheet__column">
             <div className="print-sheet__col-title">PRODUCTO SOLICITADO</div>
             
+            {asset.producto ? (
+              <div className="print-field">
+                <span className="print-field__label">PRODUCTO</span>
+                <span className="print-field__val-line">{asset.producto}</span>
+              </div>
+            ) : null}
+
             <div className="print-field">
               <span className="print-field__label">DESCRIPCIÓN</span>
               <div className="print-field__content print-field__content--multiline">
@@ -79,8 +95,8 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
             </div>
 
             <div className="print-field print-field--subgrid">
-              <span className="print-field__sublabel">MEDIDAS</span>
-              <div className="print-field__row">
+              <div className="print-field__sublabel-bar">MEDIDAS</div>
+              <div className="print-field__row" style={{ gridTemplateColumns: asset.micrones ? 'repeat(3, 1fr)' : '1fr 1fr' }}>
                 <div>
                   <span className="print-micro-label">ANCHO</span>
                   <span className="print-value-box">{asset.ancho || ''}</span>
@@ -89,10 +105,12 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
                   <span className="print-micro-label">LARGO</span>
                   <span className="print-value-box">{asset.largo || ''}</span>
                 </div>
-                <div>
-                  <span className="print-micro-label">µ</span>
-                  <span className="print-value-box">{asset.micrones || ''}</span>
-                </div>
+                {asset.micrones ? (
+                  <div>
+                    <span className="print-micro-label">MICRONES (µ)</span>
+                    <span className="print-value-box">{asset.micrones}</span>
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -106,14 +124,9 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
               <span className="print-field__val-line">{asset.cantidad_kilos || ''}</span>
             </div>
 
-            <div className="print-field">
+            <div className="print-field print-field--grow">
               <span className="print-field__label">CANTIDAD METROS</span>
               <span className="print-field__val-line">{asset.cantidad_metros || ''}</span>
-            </div>
-
-            <div className="print-field print-field--grow">
-              <span className="print-field__label">Dato extra:</span>
-              <span className="print-field__val-text">{asset.dato_extra_producto || ''}</span>
             </div>
           </div>
 
@@ -123,29 +136,12 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
 
             <div className="print-split-row">
               <div className="print-split-cell">
-                <span className="print-label-sm">MATERIAL DEL CLIENTE</span>
+                <span className="print-label-sm">MATERIAL CLIENTE</span>
                 <span className="print-options">
                   <strong className={isSelected(matCliente, 'SI') ? 'active-opt' : ''}>SI</strong> /{' '}
                   <strong className={isSelected(matCliente, 'NO') ? 'active-opt' : ''}>NO</strong>
                 </span>
               </div>
-              <div className="print-split-cell">
-                <span className="print-label-sm">MATERIAL A EXTRUDAR</span>
-                <span className="print-value-sm">{asset.material_a_extrudar || ''}</span>
-              </div>
-            </div>
-
-            <div className="print-split-row">
-              <div className="print-split-cell">
-                <span className="print-options">TUBO / TUBO AB A 1 L / LAMINA</span>
-              </div>
-              <div className="print-split-cell">
-                <span className="print-label-sm">COLOR DE TELA:</span>
-                <span className="print-value-sm">{asset.color_tela || ''}</span>
-              </div>
-            </div>
-
-            <div className="print-split-row">
               <div className="print-split-cell">
                 <span className="print-label-sm">TRATADO</span>
                 <span className="print-options">
@@ -153,56 +149,41 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
                   <strong className={isSelected(tratadoVal, 'NO') ? 'active-opt' : ''}>NO</strong>
                 </span>
               </div>
-              <div className="print-split-cell">
-                <span className="print-label-sm">Kilos extrudados</span>
-                <span className="print-value-sm">{asset.kilos_extrudados || ''}</span>
-              </div>
             </div>
 
             <div className="print-split-row">
               <div className="print-split-cell">
+                <span className="print-label-sm">CARAS</span>
                 <span className="print-options">
                   <strong className={isSelected(carasExtrusion, '1 cara') ? 'active-opt' : ''}>1 CARA</strong> /{' '}
                   <strong className={isSelected(carasExtrusion, '2 caras') ? 'active-opt' : ''}>2 CARAS</strong>
                 </span>
               </div>
               <div className="print-split-cell">
-                <span className="print-label-sm">Metros extrudados</span>
-                <span className="print-value-sm">{asset.metros_extrudados || ''}</span>
-              </div>
-            </div>
-
-            <div className="print-split-row">
-              <div className="print-split-cell">
                 <span className="print-label-sm">FUELLE</span>
                 <span className="print-options">
-                  <strong className={isSelected(fuelleVal, 'SI') ? 'active-opt' : ''}>SI</strong> {asset.fuelle_cm ? `${asset.fuelle_cm} cm` : ''} /{' '}
+                  <strong className={isSelected(fuelleVal, 'SI') ? 'active-opt' : ''}>SI</strong> /{' '}
                   <strong className={isSelected(fuelleVal, 'NO') ? 'active-opt' : ''}>NO</strong>
                 </span>
               </div>
-              <div className="print-split-cell">
-                <span className="print-label-sm">Cantidad de bobinas</span>
-                <span className="print-value-sm">{asset.cantidad_bobinas || ''}</span>
-              </div>
             </div>
 
-            <div className="print-split-row">
-              <div className="print-split-cell">
-                <span className="print-label-sm">Microperforada</span>
-                <span className="print-options">
-                  <strong className={isSelected(microVal, 'SI') ? 'active-opt' : ''}>SI</strong> /{' '}
-                  <strong className={isSelected(microVal, 'NO') ? 'active-opt' : ''}>NO</strong>
-                </span>
-              </div>
-              <div className="print-split-cell">
-                <span className="print-label-sm">Dato extra</span>
-                <span className="print-value-sm">{asset.dato_extra_extrusion || ''}</span>
-              </div>
+            <div className="print-field">
+              <span className="print-field__label">MICROPERFORADA</span>
+              <span className="print-options">
+                <strong className={isSelected(microVal, 'SI') ? 'active-opt' : ''}>SI</strong> /{' '}
+                <strong className={isSelected(microVal, 'NO') ? 'active-opt' : ''}>NO</strong>
+              </span>
             </div>
 
-            <div className="print-field print-field--bottom-box">
-              <span className="print-field__label">EXTRUSOR:</span>
-              <span className="print-field__val-text">{asset.extrusor || ''}</span>
+            <div className="print-field">
+              <span className="print-field__label">TUBO:</span>
+              <span className="print-field__val-line">{asset.tubo_tipo || ''}</span>
+            </div>
+
+            <div className="print-field print-field--grow">
+              <span className="print-field__label">COLOR DE TELA:</span>
+              <span className="print-field__val-line">{asset.color_tela || ''}</span>
             </div>
           </div>
 
@@ -210,17 +191,18 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
           <div className="print-sheet__column">
             <div className="print-sheet__col-title">DATOS DE CONFECCIÓN</div>
 
-            <div className="print-field">
-              <span className="print-field__label">CORTE</span>
-              <span className="print-options">
-                <strong className={isSelected(corteVal, 'LATERAL') ? 'active-opt' : ''}>LATERAL</strong> /{' '}
-                <strong className={isSelected(corteVal, 'FONDO') ? 'active-opt' : ''}>FONDO</strong>
-              </span>
-            </div>
-
-            <div className="print-field">
-              <span className="print-field__label">Golpes por minuto</span>
-              <span className="print-field__val-line">{asset.golpes_por_minuto || ''}</span>
+            <div className="print-split-row">
+              <div className="print-split-cell">
+                <span className="print-label-sm">CORTE</span>
+                <span className="print-options">
+                  <strong className={isSelected(corteVal, 'LATERAL') ? 'active-opt' : ''}>LATERAL</strong> /{' '}
+                  <strong className={isSelected(corteVal, 'FONDO') ? 'active-opt' : ''}>FONDO</strong>
+                </span>
+              </div>
+              <div className="print-split-cell">
+                <span className="print-label-sm">GOLPES / MIN</span>
+                <span className="print-value-sm">{asset.golpes_por_minuto || ''}</span>
+              </div>
             </div>
 
             <div className="print-field">
@@ -232,24 +214,29 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
               </span>
             </div>
 
-            <div className="print-field">
-              <span className="print-field__label">Dato extra</span>
-              <span className="print-field__val-text">{asset.dato_extra_confeccion || ''}</span>
+            <div className="print-split-row">
+              <div className="print-split-cell">
+                <span className="print-label-sm">FUELLE</span>
+                <span className="print-options">
+                  <strong className={isSelected(asset.fuelle_confeccion, 'si') ? 'active-opt' : ''}>SI</strong> /{' '}
+                  <strong className={isSelected(asset.fuelle_confeccion, 'no') ? 'active-opt' : ''}>NO</strong>
+                </span>
+              </div>
+              <div className="print-split-cell">
+                <span className="print-label-sm">PERFORADO</span>
+                <span className="print-options">
+                  <strong className={isSelected(asset.perforado, 'si') ? 'active-opt' : ''}>SI</strong> /{' '}
+                  <strong className={isSelected(asset.perforado, 'no') ? 'active-opt' : ''}>NO</strong>
+                </span>
+              </div>
             </div>
 
-            <div className="print-field">
-              <span className="print-field__label">Cantidad resultante:</span>
-              <span className="print-field__val-line">{asset.cantidad_resultante || ''}</span>
-            </div>
-
-            <div className="print-field">
-              <span className="print-field__label">Bultos:</span>
-              <span className="print-field__val-line">{asset.bultos || ''}</span>
-            </div>
-
-            <div className="print-field print-field--bottom-box">
-              <span className="print-field__label">CONFECCIONISTA:</span>
-              <span className="print-field__val-text">{asset.confeccionista || ''}</span>
+            <div className="print-field print-field--grow">
+              <span className="print-field__label">BOLSA EXHIBIDORA</span>
+              <span className="print-options">
+                <strong className={isSelected(asset.bolsa_exhibidora, 'si') ? 'active-opt' : ''}>SI</strong> /{' '}
+                <strong className={isSelected(asset.bolsa_exhibidora, 'no') ? 'active-opt' : ''}>NO</strong>
+              </span>
             </div>
           </div>
 
@@ -260,7 +247,7 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
             <div className="print-field">
               <span className="print-field__label">IMPRESIÓN</span>
               <span className="print-options">
-                <strong className={isSelected(impresionCaras, '1 CARA') || isSelected(impresionCaras, '1 CARA / 2 CARAS') ? 'active-opt' : ''}>1 CARA</strong> /{' '}
+                <strong className={isSelected(impresionCaras, '1 CARA') ? 'active-opt' : ''}>1 CARA</strong> /{' '}
                 <strong className={isSelected(impresionCaras, '2 CARAS') ? 'active-opt' : ''}>2 CARAS</strong>
               </span>
             </div>
@@ -276,41 +263,31 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
               </span>
             </div>
 
-            <div className="print-field">
-              <span className="print-field__label">Metros por hora</span>
-              <span className="print-field__val-line">{asset.metros_por_hora || ''}</span>
-            </div>
-
             <div className="print-split-row">
               <div className="print-split-cell">
-                <span className="print-label-sm">T puesta a punto</span>
-                <span className="print-value-sm">{asset.t_puesta_a_punto || ''}</span>
+                <span className="print-label-sm">LATERAL</span>
+                <span className="print-options">
+                  <strong className={isSelected(asset.impresion_lateral, 'si') ? 'active-opt' : ''}>SI</strong> /{' '}
+                  <strong className={isSelected(asset.impresion_lateral, 'no') ? 'active-opt' : ''}>NO</strong>
+                </span>
               </div>
               <div className="print-split-cell">
-                <span className="print-label-sm">T de impresión</span>
-                <span className="print-value-sm">{asset.t_impresion || ''}</span>
-              </div>
-            </div>
-
-            <div className="print-split-row">
-              <div className="print-split-cell">
-                <span className="print-label-sm">Cilindro:</span>
-                <span className="print-value-sm">{asset.cilindro || ''}</span>
-              </div>
-              <div className="print-split-cell">
-                <span className="print-label-sm">Bobinas impresas</span>
-                <span className="print-value-sm">{asset.bobinas_impresas || ''}</span>
+                <span className="print-label-sm">FONDO</span>
+                <span className="print-options">
+                  <strong className={isSelected(asset.impresion_fondo, 'si') ? 'active-opt' : ''}>SI</strong> /{' '}
+                  <strong className={isSelected(asset.impresion_fondo, 'no') ? 'active-opt' : ''}>NO</strong>
+                </span>
               </div>
             </div>
 
             <div className="print-field">
-              <span className="print-field__label">Colores:</span>
+              <span className="print-field__label">CILINDRO:</span>
+              <span className="print-field__val-line">{asset.cilindro || ''}</span>
+            </div>
+
+            <div className="print-field print-field--grow">
+              <span className="print-field__label">COLORES:</span>
               <span className="print-field__val-text">{asset.colores_detalle || ''}</span>
-            </div>
-
-            <div className="print-field print-field--bottom-box">
-              <span className="print-field__label">IMPRESOR:</span>
-              <span className="print-field__val-text">{asset.impresor || ''}</span>
             </div>
           </div>
         </div>
@@ -318,7 +295,7 @@ export function ClientPrintSheet({ asset }: ClientPrintSheetProps) {
         {/* ── Pie de Página: Observaciones ── */}
         <div className="print-sheet__footer">
           <span className="print-field__label">OBSERVACIONES:</span>
-          <span className="print-field__val-text">{asset.observaciones || ''}</span>
+          <span className="print-field__val-text">{asset.observaciones || asset.dato_extra_producto || ''}</span>
         </div>
       </div>
     </div>
