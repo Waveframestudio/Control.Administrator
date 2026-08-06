@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import type { AssetFiltersState } from '../../types/assets.types';
@@ -7,7 +8,7 @@ interface AssetFiltersProps {
   onChange: (filters: AssetFiltersState) => void;
 }
 
-export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
+export const AssetFilters = memo(function AssetFilters({ filters, onChange }: AssetFiltersProps) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange({ ...filters, search: e.target.value });
   };
@@ -71,4 +72,4 @@ export function AssetFilters({ filters, onChange }: AssetFiltersProps) {
       </div>
     </div>
   );
-}
+});

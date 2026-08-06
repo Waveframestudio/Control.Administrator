@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
@@ -48,40 +48,13 @@ const COLORES_OPTIONS = [
   { value: '6C', label: '6C' },
 ];
 
-export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
+export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
   // Campos del encabezado horizontal
   const [clientName, setClientName] = useState('');
   const [clientId, setClientId] = useState('');
   const [fechaComienzo, setFechaComienzo] = useState('');
   const [fechaFin, setFechaFin] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
-
-  /**
-   * Mascara de fecha: auto-inserta '/' al tipear solo dígitos.
-   * Resultado: dd/mm/aaaa
-   */
-  const handleDateInput = (
-    raw: string,
-    prev: string,
-    setter: (v: string) => void
-  ) => {
-    // Permitir borrado libre
-    if (raw.length < prev.length) {
-      setter(raw);
-      return;
-    }
-    // Solo dígitos y '/' (filtra el resto)
-    const digits = raw.replace(/[^\d]/g, '');
-    let formatted = '';
-    if (digits.length <= 2) {
-      formatted = digits;
-    } else if (digits.length <= 4) {
-      formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    } else {
-      formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
-    }
-    setter(formatted);
-  };
 
   /**
    * Permite ingresar números con punto o coma decimal (hasta 2 decimales).
@@ -145,6 +118,25 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const toYYYYMMDD = (dateStr?: string): string => {
+    if (!dateStr) return '';
+    const trimmed = dateStr.trim();
+    if (!trimmed) return '';
+    if (trimmed.includes('/')) {
+      const parts = trimmed.split('/');
+      if (parts.length === 3) {
+        const [day, month, year] = parts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+    }
+    const datePart = trimmed.split('T')[0].split(' ')[0];
+    const parts = datePart.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      return datePart;
+    }
+    return '';
+  };
+
   const toDMY = (dateStr?: string): string => {
     if (!dateStr) return '';
     const trimmed = dateStr.trim();
@@ -163,9 +155,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
     if (assetToEdit) {
       setClientName(assetToEdit.name || '');
       setClientId(assetToEdit.client_id || '');
-      setFechaComienzo(toDMY(assetToEdit.fecha_comienzo));
-      setFechaFin(toDMY(assetToEdit.fecha_fin));
-      setDeliveryDate(toDMY(assetToEdit.fecha_entrega));
+      setFechaComienzo(toYYYYMMDD(assetToEdit.fecha_comienzo));
+      setFechaFin(toYYYYMMDD(assetToEdit.fecha_fin));
+      setDeliveryDate(toYYYYMMDD(assetToEdit.fecha_entrega));
 
       setDescripcion(assetToEdit.descripcion || assetToEdit.ip_address || '');
       setProducto(assetToEdit.producto || '');
@@ -284,9 +276,9 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       status: 'Active',
       criticality: 'Medium',
 
-      fecha_comienzo: fechaComienzo,
-      fecha_fin: fechaFin,
-      fecha_entrega: deliveryDate,
+      fecha_comienzo: toDMY(fechaComienzo),
+      fecha_fin: toDMY(fechaFin),
+      fecha_entrega: toDMY(deliveryDate),
 
       producto: producto.trim(),
       descripcion: descripcion.trim(),
@@ -360,38 +352,23 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
           <Input
             id="top-fecha-comienzo"
             label="Fecha comienzo"
-            type="text"
-            placeholder="dd/mm/aaaa"
+            type="date"
             value={fechaComienzo}
-            inputMode="numeric"
-            maxLength={10}
-            onChange={(e) =>
-              handleDateInput(e.target.value, fechaComienzo, setFechaComienzo)
-            }
+            onChange={(e) => setFechaComienzo(e.target.value)}
           />
           <Input
             id="top-fecha-fin"
             label="Fecha fin"
-            type="text"
-            placeholder="dd/mm/aaaa"
+            type="date"
             value={fechaFin}
-            inputMode="numeric"
-            maxLength={10}
-            onChange={(e) =>
-              handleDateInput(e.target.value, fechaFin, setFechaFin)
-            }
+            onChange={(e) => setFechaFin(e.target.value)}
           />
           <Input
             id="top-fecha-entrega"
             label="Fecha entrega"
-            type="text"
-            placeholder="dd/mm/aaaa"
+            type="date"
             value={deliveryDate}
-            inputMode="numeric"
-            maxLength={10}
-            onChange={(e) =>
-              handleDateInput(e.target.value, deliveryDate, setDeliveryDate)
-            }
+            onChange={(e) => setDeliveryDate(e.target.value)}
           />
         </div>
 
@@ -682,4 +659,4 @@ export function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModa
       </form>
     </Modal>
   );
-}
+});

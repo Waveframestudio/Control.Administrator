@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { usePermissions } from '../../hooks/usePermissions';
 import type { SystemAsset } from '../../types/assets.types';
 
@@ -11,7 +11,7 @@ interface AssetTableProps {
 
 const PAGE_SIZE = 10;
 
-export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: AssetTableProps) {
+export const AssetTable = memo(function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: AssetTableProps) {
   const { isAdmin } = usePermissions();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -270,4 +270,4 @@ export function AssetTable({ assets, onEdit, onDelete, onPrintIndividual }: Asse
       </footer>
     </div>
   );
-}
+});
