@@ -1,6 +1,7 @@
 import { useState, useEffect, memo } from 'react';
 import { usePermissions } from '../../hooks/usePermissions';
 import type { SystemAsset } from '../../types/assets.types';
+import { getEffectiveStatus } from '../../types/assets.types';
 
 interface AssetTableProps {
   assets: SystemAsset[];
@@ -33,20 +34,24 @@ export const AssetTable = memo(function AssetTable({ assets, onEdit, onDelete, o
   };
 
   // ── Status helpers ─────────────────────────────────────────────────────────
-  const getStatusClass = (status: SystemAsset['status']): string => {
-    const s = (status || '').toLowerCase().trim();
-    if (s === 'active' || s === 'en proceso') return 'badge--status-active';
-    if (s === 'maintenance' || s === 'finalizado') return 'badge--status-maintenance';
-    if (s === 'offline' || s === 'entregado') return 'badge--status-offline';
-    return 'badge--status-active';
+  const getStatusClass = (asset: SystemAsset): string => {
+    const status = getEffectiveStatus(asset);
+    switch (status) {
+      case 'Active': return 'badge--status-active';
+      case 'Maintenance': return 'badge--status-maintenance';
+      case 'Offline': return 'badge--status-offline';
+      default: return 'badge--status-active';
+    }
   };
 
-  const getStatusLabel = (status: SystemAsset['status']): string => {
-    const s = (status || '').toLowerCase().trim();
-    if (s === 'active' || s === 'en proceso') return 'En proceso';
-    if (s === 'maintenance' || s === 'finalizado') return 'Finalizado';
-    if (s === 'offline' || s === 'entregado') return 'Entregado';
-    return status || 'En proceso';
+  const getStatusLabel = (asset: SystemAsset): string => {
+    const status = getEffectiveStatus(asset);
+    switch (status) {
+      case 'Active': return 'En proceso';
+      case 'Maintenance': return 'Finalizado';
+      case 'Offline': return 'Entregado';
+      default: return 'En proceso';
+    }
   };
 
   // ── Date formatter: dd/mm/aaaa (no time) ───────────────────────────────────
@@ -167,8 +172,8 @@ export const AssetTable = memo(function AssetTable({ assets, onEdit, onDelete, o
 
               {/* Estado */}
               <td className="data-table__cell">
-                <span className={`badge ${getStatusClass(asset.status)}`}>
-                  {getStatusLabel(asset.status)}
+                <span className={`badge ${getStatusClass(asset)}`}>
+                  {getStatusLabel(asset)}
                 </span>
               </td>
 

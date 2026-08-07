@@ -10,6 +10,7 @@ import { ClientPrintSheet } from '../components/dashboard/ClientPrintSheet';
 import { usePermissions } from '../hooks/usePermissions';
 import { supabase } from '../lib/supabase';
 import type { SystemAsset, AssetFiltersState, AssetStatsData } from '../types/assets.types';
+import { getEffectiveStatus } from '../types/assets.types';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 
@@ -86,18 +87,9 @@ export function DashboardPage() {
   const stats = useMemo<AssetStatsData>(() => {
     return {
       total: assets.length,
-      active: assets.filter((a) => {
-        const s = (a.status || '').toLowerCase().trim();
-        return s === 'active' || s === 'en proceso';
-      }).length,
-      maintenance: assets.filter((a) => {
-        const s = (a.status || '').toLowerCase().trim();
-        return s === 'maintenance' || s === 'finalizado';
-      }).length,
-      offline: assets.filter((a) => {
-        const s = (a.status || '').toLowerCase().trim();
-        return s === 'offline' || s === 'entregado';
-      }).length,
+      active: assets.filter((a) => getEffectiveStatus(a) === 'Active').length,
+      maintenance: assets.filter((a) => getEffectiveStatus(a) === 'Maintenance').length,
+      offline: assets.filter((a) => getEffectiveStatus(a) === 'Offline').length,
     };
   }, [assets]);
 
@@ -114,12 +106,13 @@ export function DashboardPage() {
       return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     };
 
-    const getStatusLabel = (status?: string) => {
-      switch (status) {
+    const getStatusLabel = (asset: SystemAsset) => {
+      const st = getEffectiveStatus(asset);
+      switch (st) {
         case 'Active': return 'En proceso';
         case 'Maintenance': return 'Finalizado';
         case 'Offline': return 'Entregado';
-        default: return status || '';
+        default: return st || '';
       }
     };
 
@@ -145,7 +138,7 @@ export function DashboardPage() {
         case 'producto':
           return matchText(asset.producto);
         case 'status':
-          return matchText(getStatusLabel(asset.status)) || matchText(asset.status);
+          return matchText(getStatusLabel(asset)) || matchText(asset.status);
         case 'fecha_comienzo':
           return matchDate(asset.fecha_comienzo);
         case 'fecha_fin':
@@ -158,7 +151,7 @@ export function DashboardPage() {
             matchText(asset.client_id) ||
             matchText(asset.name) ||
             matchText(asset.producto) ||
-            matchText(getStatusLabel(asset.status)) ||
+            matchText(getStatusLabel(asset)) ||
             matchText(asset.status) ||
             matchDate(asset.fecha_comienzo) ||
             matchDate(asset.fecha_fin) ||

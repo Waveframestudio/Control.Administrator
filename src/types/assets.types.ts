@@ -86,3 +86,54 @@ export interface AssetStatsData {
   maintenance: number;
   offline: number;
 }
+
+export function parseDateString(dateStr?: string | null): Date | null {
+  if (!dateStr || !dateStr.trim()) return null;
+  const trimmed = dateStr.trim();
+
+  // Si viene en formato DD/MM/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split('/').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Si viene en formato YYYY-MM-DD
+  const dateOnly = trimmed.split('T')[0].split(' ')[0];
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+    const [y, m, d] = dateOnly.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  const d = new Date(trimmed);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+export function getEffectiveStatus(asset: Partial<SystemAsset>): AssetStatus {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = parseDateString(asset.fecha_comienzo);
+  const end = parseDateString(asset.fecha_fin);
+  const delivery = parseDateString(asset.fecha_entrega);
+
+  // 1. Si existe fecha de entrega y hoy es >= fecha de entrega -> Entregado ('Offline')
+  if (delivery && today >= delivery) {
+    return 'Offline';
+  }
+
+  // 2. Si existe fecha de fin y hoy es >= fecha de fin -> Finalizado ('Maintenance')
+  if (end && today >= end) {
+    return 'Maintenance';
+  }
+
+  // 3. Si existe fecha de comienzo y hoy es >= fecha de comienzo -> En proceso ('Active')
+  if (start && today >= start) {
+    return 'Active';
+  }
+
+  // Fallback al estado explícito o por defecto 'Active'
+  const s = (asset.status || '').toLowerCase().trim();
+  if (s === 'maintenance' || s === 'finalizado') return 'Maintenance';
+  if (s === 'offline' || s === 'entregado') return 'Offline';
+  return 'Active';
+}
