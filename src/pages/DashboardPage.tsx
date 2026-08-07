@@ -286,7 +286,7 @@ export function DashboardPage() {
     clone.style.top = '0';
 
     const opt: any = {
-      margin:       4,
+      margin:       [0, 4, 4, 4],   // [top, right, bottom, left]
       filename:     filename,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { 

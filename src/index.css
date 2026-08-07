@@ -1921,9 +1921,9 @@ textarea.input-group__field--textarea {
   min-height: auto !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   box-sizing: border-box !important;
-  padding: 15mm 0 !important;
+  padding: 0 !important;
 }
 
 .print-page-pair--single .print-sheet-container {
