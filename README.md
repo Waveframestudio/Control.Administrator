@@ -6,20 +6,12 @@
 
   **Sistema Integral de Gestión de Clientes, Pedidos y Fichas Técnicas de Producción**
 
-  [![React](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![Vite](https://img.shields.io/badge/Vite-8.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-  [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+  ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+  ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+  ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+  ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
 </div>
-
----
-
-## 📌 Vista Principal del Dashboard
-
-<p align="center">
-  <img src="docs/screenshots/03_dashboard_grid.png" alt="Dashboard Principal" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</p>
 
 ---
 
@@ -31,6 +23,14 @@
 * 🔍 **Filtro y Búsqueda Inteligente**: Búsqueda instantánea multi-campo por Cliente, ID, Producto, Fechas y Estado.
 * 🔒 **Seguridad y Perfiles de Usuario**: Control de acceso autenticado y roles de usuario (Administrador / Operario).
 * 🎨 **Interfaz Ultra-Moderna**: Diseño en modo oscuro optimizado para alta visibilidad y dinamismo operativo.
+
+---
+
+## 📌 Vista Principal del Dashboard
+
+<p align="center">
+  <img src="docs/screenshots/03_dashboard_grid.png" alt="Dashboard Principal" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</p>
 
 ---
 
