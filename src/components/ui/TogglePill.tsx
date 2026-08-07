@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface TogglePillOption {
   value: string;
@@ -13,7 +13,7 @@ interface TogglePillProps {
   className?: string;
 }
 
-export const TogglePill: React.FC<TogglePillProps> = ({
+export const TogglePill: React.FC<TogglePillProps> = memo(({
   label,
   options,
   value,
@@ -40,4 +40,4 @@ export const TogglePill: React.FC<TogglePillProps> = ({
       </div>
     </div>
   );
-};
+});

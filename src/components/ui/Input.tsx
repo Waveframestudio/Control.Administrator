@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 import type { InputHTMLAttributes } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -13,8 +13,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, id, className = '', suffix, ...props }, ref) => {
+export const Input = memo(
+  forwardRef<HTMLInputElement, InputProps>(
+    ({ label, error, helperText, id, className = '', suffix, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
     const isRequired = props.required;
 
@@ -53,7 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  })
 );
 
 Input.displayName = 'Input';

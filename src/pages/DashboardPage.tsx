@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { AppLayout } from '../layouts/AppLayout';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -36,6 +36,7 @@ export function DashboardPage() {
 
   // Print State
   const [selectedClientForPrint, setSelectedClientForPrint] = useState<SystemAsset | null>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   // ── Fetch Assets from Supabase ─────────────────────────────────────────────
   useEffect(() => {
@@ -161,19 +162,23 @@ export function DashboardPage() {
   }, [assets, filters]);
 
   // ── CRUD Handlers ──────────────────────────────────────────────────────────
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = useCallback(() => {
     if (!isAdmin) return;
     setAssetToEdit(null);
     setIsModalOpen(true);
-  };
+  }, [isAdmin]);
 
-  const handleOpenEditModal = (asset: SystemAsset) => {
+  const handleOpenEditModal = useCallback((asset: SystemAsset) => {
     if (!isAdmin) return;
     setAssetToEdit(asset);
     setIsModalOpen(true);
-  };
+  }, [isAdmin]);
 
-  const handleFormSubmit = async (formData: Omit<SystemAsset, 'id' | 'last_inspected'> & { id?: string }) => {
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const handleFormSubmit = useCallback(async (formData: Omit<SystemAsset, 'id' | 'last_inspected'> & { id?: string }) => {
     if (!isAdmin) return;
 
     const isoTimestamp = new Date().toISOString();
@@ -236,7 +241,7 @@ export function DashboardPage() {
       console.error('[DashboardPage] Error saving asset:', err);
       alert(`Error al guardar el activo: ${err.message}`);
     }
-  };
+  }, [isAdmin]);
 
   const handleDeleteAsset = (id: string) => {
     if (!isAdmin) return;
@@ -315,23 +320,29 @@ export function DashboardPage() {
 
   const handlePrintAll = () => {
     setSelectedClientForPrint(null);
+    setIsPrinting(true);
     setTimeout(() => {
       generatePDF('print', 'Fichas_Clientes.pdf', 'landscape');
-    }, 50);
+      setTimeout(() => setIsPrinting(false), 2000);
+    }, 100);
   };
 
   const handleExportPDF = () => {
     setSelectedClientForPrint(null);
+    setIsPrinting(true);
     setTimeout(() => {
       generatePDF('download', 'Fichas_Clientes.pdf', 'landscape');
-    }, 50);
+      setTimeout(() => setIsPrinting(false), 2000);
+    }, 100);
   };
 
   const handlePrintIndividual = (client: SystemAsset) => {
     setSelectedClientForPrint(client);
+    setIsPrinting(true);
     setTimeout(() => {
       generatePDF('print', `Ficha_${client.name || 'Cliente'}.pdf`, 'landscape');
-    }, 50);
+      setTimeout(() => setIsPrinting(false), 2000);
+    }, 100);
   };
 
   // ── Batch Print Pairs (2 clients per page) ────────────────────────────────
@@ -441,7 +452,7 @@ export function DashboardPage() {
         {isAdmin && (
           <AssetModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+            onClose={handleCloseModal}
             onSubmit={handleFormSubmit}
             assetToEdit={assetToEdit}
           />
@@ -458,37 +469,39 @@ export function DashboardPage() {
           onCancel={handleCancelDelete}
         />
 
-        {/* ── Printable Technical Sheets Container (Hidden on Screen, Visible on Print) ── */}
-        <div className="printable-sheets-area">
-          {selectedClientForPrint ? (
-            <div className="print-page-pair print-page-pair--single">
-              <div className="print-sheet-item">
-                <ClientPrintSheet asset={selectedClientForPrint} />
+        {/* ── Printable Technical Sheets Container (Rendered On Demand) ── */}
+        {isPrinting && (
+          <div className="printable-sheets-area">
+            {selectedClientForPrint ? (
+              <div className="print-page-pair print-page-pair--single">
+                <div className="print-sheet-item">
+                  <ClientPrintSheet asset={selectedClientForPrint} />
+                </div>
               </div>
-            </div>
-          ) : (
-            clientPairs.map((pair, pairIdx) => (
-              <div key={`print-pair-${pairIdx}`} className="print-page-pair">
-                {pair.map((asset, idx) => (
-                  <div key={`print-${asset.id}`} className="print-sheet-wrapper">
-                    <div className="print-sheet-item">
-                      <ClientPrintSheet asset={asset} />
-                    </div>
-                    {idx === 0 && pair.length > 1 && (
-                      <div className="print-cut-line">
-                        <span className="print-cut-line__scissors">✂</span>
-                        <span className="print-cut-line__dashed"></span>
-                        <span className="print-cut-line__label">LÍNEA DE CORTE</span>
-                        <span className="print-cut-line__dashed"></span>
-                        <span className="print-cut-line__scissors">✂</span>
+            ) : (
+              clientPairs.map((pair, pairIdx) => (
+                <div key={`print-pair-${pairIdx}`} className="print-page-pair">
+                  {pair.map((asset, idx) => (
+                    <div key={`print-${asset.id}`} className="print-sheet-wrapper">
+                      <div className="print-sheet-item">
+                        <ClientPrintSheet asset={asset} />
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ))
-          )}
-        </div>
+                      {idx === 0 && pair.length > 1 && (
+                        <div className="print-cut-line">
+                          <span className="print-cut-line__scissors">✂</span>
+                          <span className="print-cut-line__dashed"></span>
+                          <span className="print-cut-line__label">LÍNEA DE CORTE</span>
+                          <span className="print-cut-line__dashed"></span>
+                          <span className="print-cut-line__scissors">✂</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </AppLayout>
   );
