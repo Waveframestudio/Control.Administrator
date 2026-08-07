@@ -186,24 +186,23 @@ export function DashboardPage() {
 
     try {
       setError(null);
-      if (formData.id) {
+      const { id, ...dataToSave } = formData;
+      const payload = {
+        ...dataToSave,
+        last_inspected: isoTimestamp,
+      };
+
+      if (id) {
         const { error: updateError } = await supabase
           .from('assets')
-          .update({
-            name: formData.name,
-            ip_address: formData.ip_address,
-            category: formData.category,
-            status: formData.status,
-            criticality: formData.criticality,
-            last_inspected: isoTimestamp,
-          })
-          .eq('id', formData.id);
+          .update(payload)
+          .eq('id', id);
 
         if (updateError) throw new Error(updateError.message);
 
         setAssets((prev) =>
           prev.map((asset) =>
-            asset.id === formData.id
+            asset.id === id
               ? ({
                 ...asset,
                 ...formData,
@@ -215,14 +214,7 @@ export function DashboardPage() {
       } else {
         const { data, error: insertError } = await supabase
           .from('assets')
-          .insert({
-            name: formData.name,
-            ip_address: formData.ip_address,
-            category: formData.category,
-            status: formData.status,
-            criticality: formData.criticality,
-            last_inspected: isoTimestamp,
-          })
+          .insert(payload)
           .select()
           .single();
 
@@ -230,7 +222,7 @@ export function DashboardPage() {
 
         const newAsset: SystemAsset = {
           ...formData,
-          id: data.id,
+          ...data,
           last_inspected: uiTimestamp,
         } as SystemAsset;
 
