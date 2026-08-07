@@ -34,38 +34,49 @@ export const AssetTable = memo(function AssetTable({ assets, onEdit, onDelete, o
 
   // ── Status helpers ─────────────────────────────────────────────────────────
   const getStatusClass = (status: SystemAsset['status']): string => {
-    switch (status) {
-      case 'Active':
-        return 'badge--status-active';
-      case 'Maintenance':
-        return 'badge--status-maintenance';
-      case 'Offline':
-        return 'badge--status-offline';
-      default:
-        return '';
-    }
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'active' || s === 'en proceso') return 'badge--status-active';
+    if (s === 'maintenance' || s === 'finalizado') return 'badge--status-maintenance';
+    if (s === 'offline' || s === 'entregado') return 'badge--status-offline';
+    return 'badge--status-active';
   };
 
   const getStatusLabel = (status: SystemAsset['status']): string => {
-    switch (status) {
-      case 'Active':
-        return 'En proceso';
-      case 'Maintenance':
-        return 'Finalizado';
-      case 'Offline':
-        return 'Entregado';
-      default:
-        return status;
-    }
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'active' || s === 'en proceso') return 'En proceso';
+    if (s === 'maintenance' || s === 'finalizado') return 'Finalizado';
+    if (s === 'offline' || s === 'entregado') return 'Entregado';
+    return status || 'En proceso';
   };
 
   // ── Date formatter: dd/mm/aaaa (no time) ───────────────────────────────────
   const formatDate = (dateStr: string | undefined | null): string => {
     if (!dateStr) return '—';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+    const trimmed = dateStr.trim();
+    if (!trimmed) return '—';
+
+    // Si ya viene en formato DD/MM/YYYY o DD/MM/YY
+    if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(trimmed)) {
+      const [d, m, y] = trimmed.split('/');
+      const fullYear = y.length === 2 ? `20${y}` : y;
+      return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${fullYear}`;
+    }
+
+    // Si viene en formato YYYY-MM-DD
+    const dateOnly = trimmed.split('T')[0].split(' ')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+      const [y, m, d] = dateOnly.split('-');
+      return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+    }
+
+    // Fallback Date object
+    const date = new Date(trimmed);
+    if (!isNaN(date.getTime())) {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+    }
+
+    return trimmed;
   };
 
   if (assets.length === 0) {

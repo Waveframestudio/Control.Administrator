@@ -1,6 +1,7 @@
 import { useState, useEffect, memo } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 import { Textarea } from '../ui/Textarea';
 import { TogglePill } from '../ui/TogglePill';
 import { Button } from '../ui/Button';
@@ -48,10 +49,17 @@ const COLORES_OPTIONS = [
   { value: '6C', label: '6C' },
 ];
 
+const ESTADO_OPTIONS = [
+  { value: 'Active', label: 'En proceso' },
+  { value: 'Maintenance', label: 'Finalizado' },
+  { value: 'Offline', label: 'Entregado' },
+];
+
 export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, assetToEdit }: AssetModalProps) {
   // Campos del encabezado horizontal
   const [clientName, setClientName] = useState('');
   const [clientId, setClientId] = useState('');
+  const [status, setStatus] = useState<SystemAsset['status']>('Active');
   const [fechaComienzo, setFechaComienzo] = useState('');
   const [fechaFin, setFechaFin] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
@@ -73,6 +81,21 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
       clean = `${parts[0]}.${parts[1].slice(0, 2)}`;
     }
     setter(clean);
+  };
+
+  /**
+   * Formatea automáticamente con dos decimales al perder el foco (onBlur).
+   */
+  const handleDecimalBlur = (
+    val: string,
+    setter: (v: string) => void
+  ) => {
+    if (!val || val.trim() === '') return;
+    const clean = val.replace(',', '.');
+    const num = parseFloat(clean);
+    if (!isNaN(num)) {
+      setter(num.toFixed(2));
+    }
   };
 
   // Parte 1: Producto solicitado
@@ -155,6 +178,7 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
     if (assetToEdit) {
       setClientName(assetToEdit.name || '');
       setClientId(assetToEdit.client_id || '');
+      setStatus(assetToEdit.status || 'Active');
       setFechaComienzo(toYYYYMMDD(assetToEdit.fecha_comienzo));
       setFechaFin(toYYYYMMDD(assetToEdit.fecha_fin));
       setDeliveryDate(toYYYYMMDD(assetToEdit.fecha_entrega));
@@ -200,6 +224,7 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
       // Reset form
       setClientName('');
       setClientId('');
+      setStatus('Active');
       setFechaComienzo('');
       setFechaFin('');
       setDeliveryDate('');
@@ -273,7 +298,7 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
       client_id: clientId.trim(),
       ip_address: descripcion.trim(),
       category: 'Workstation',
-      status: 'Active',
+      status: status || 'Active',
       criticality: 'Medium',
 
       fecha_comienzo: toDMY(fechaComienzo),
@@ -327,7 +352,7 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
       size="xl"
     >
       <form onSubmit={handleSubmit} noValidate className="client-form">
-        {/* ── Encabezado superior a lo largo (5 campos en una sola línea) ── */}
+        {/* ── Encabezado superior a lo largo (6 campos en 1 sola línea) ── */}
         <div className="client-form__top-bar">
           <Input
             id="top-cliente"
@@ -369,6 +394,13 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
             type="date"
             value={deliveryDate}
             onChange={(e) => setDeliveryDate(e.target.value)}
+          />
+          <Select
+            id="top-estado"
+            label="Estado"
+            options={ESTADO_OPTIONS}
+            value={status}
+            onChange={(e) => setStatus(e.target.value as SystemAsset['status'])}
           />
         </div>
 
@@ -442,6 +474,9 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
                   onChange={(e) =>
                     handleDecimalInput(e.target.value, setCantidadKilos)
                   }
+                  onBlur={() =>
+                    handleDecimalBlur(cantidadKilos, setCantidadKilos)
+                  }
                 />
                 <Input
                   id="product-metros"
@@ -453,6 +488,9 @@ export const AssetModal = memo(function AssetModal({ isOpen, onClose, onSubmit, 
                   inputMode="decimal"
                   onChange={(e) =>
                     handleDecimalInput(e.target.value, setCantidadMetros)
+                  }
+                  onBlur={() =>
+                    handleDecimalBlur(cantidadMetros, setCantidadMetros)
                   }
                 />
               </div>

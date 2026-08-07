@@ -48,7 +48,7 @@ export function DashboardPage() {
         const { data, error: supabaseError } = await supabase
           .from('assets')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: true });
 
         if (supabaseError) {
           throw new Error(supabaseError.message);
@@ -86,9 +86,18 @@ export function DashboardPage() {
   const stats = useMemo<AssetStatsData>(() => {
     return {
       total: assets.length,
-      active: assets.filter((a) => a.status === 'Active').length,
-      maintenance: assets.filter((a) => a.status === 'Maintenance').length,
-      offline: assets.filter((a) => a.status === 'Offline').length,
+      active: assets.filter((a) => {
+        const s = (a.status || '').toLowerCase().trim();
+        return s === 'active' || s === 'en proceso';
+      }).length,
+      maintenance: assets.filter((a) => {
+        const s = (a.status || '').toLowerCase().trim();
+        return s === 'maintenance' || s === 'finalizado';
+      }).length,
+      offline: assets.filter((a) => {
+        const s = (a.status || '').toLowerCase().trim();
+        return s === 'offline' || s === 'entregado';
+      }).length,
     };
   }, [assets]);
 
@@ -226,7 +235,7 @@ export function DashboardPage() {
           last_inspected: uiTimestamp,
         } as SystemAsset;
 
-        setAssets((prev) => [newAsset, ...prev]);
+        setAssets((prev) => [...prev, newAsset]);
       }
       setIsModalOpen(false);
     } catch (err: any) {

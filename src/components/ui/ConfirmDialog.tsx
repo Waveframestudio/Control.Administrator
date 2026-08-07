@@ -91,20 +91,20 @@ export function ConfirmDialog({
         {/* Actions */}
         <div className="confirm-dialog__actions">
           <Button
-            id="confirm-dialog-cancel"
-            variant="secondary"
-            size="md"
-            onClick={onCancel}
-          >
-            {cancelLabel}
-          </Button>
-          <Button
             id="confirm-dialog-confirm"
             variant="danger"
             size="md"
             onClick={onConfirm}
           >
             {confirmLabel}
+          </Button>
+          <Button
+            id="confirm-dialog-cancel"
+            variant="secondary"
+            size="md"
+            onClick={onCancel}
+          >
+            {cancelLabel}
           </Button>
         </div>
       </div>
