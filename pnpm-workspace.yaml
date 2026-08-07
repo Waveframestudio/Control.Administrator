@@ -1,3 +1,5 @@
+allowBuilds:
+  core-js: true
 minimumReleaseAgeExclude:
   - '@supabase/auth-js@2.110.9'
   - '@supabase/functions-js@2.110.9'
